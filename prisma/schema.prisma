@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum adminRole {
+  RECEIVER
+  APPROVER
+}
+
+enum supplyType {
+  OFFICE
+  OTHER
+}
+
+enum requestStatus {
+  PENDING
+  REVIEWING
+  APPROVED
+  PREPARING
+  READY
+  REJECTED
+}
+
+model departmentInformation {
+  id         String               @id @unique @default(uuid())
+  image      String?
+  deptId     String               @unique // Primary key
+  deptCode   String               @unique
+  department String               @unique
+  email      String?              @unique
+  password   String               @default("defaultpassword")
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  Request    requestInformation[]
+}
+
+model adminInformation {
+  id        String    @id @unique @default(uuid())
+  image     String?
+  adminId   String    @unique // Primary key
+  role      adminRole
+  email     String?   @unique
+  password  String    @default("defaultpassword")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model stockInformation {
+  id                String               @id @unique @default(uuid())
+  image             String?
+  fund              String
+  itemName          String
+  description       String
+  stockNo           String               @unique // stock id/no
+  preOrderPrint     String               @unique
+  unitOfmeasurement String
+  quantity          Int
+  supplier          String
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  requesitionForm   requestInformation[]
+}
+
+model requestInformation {
+  id             String                @id @unique @default(uuid())
+  qty            Int
+  unit           String
+  description    String
+  remarks        String
+  purpose        String
+  stockNo        String
+  deptId         String
+  requestType    supplyType?
+  request_status requestStatus
+  createAt       DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  stock          stockInformation      @relation(fields: [stockNo], references: [stockNo])
+  request        departmentInformation @relation(fields: [deptId], references: [deptId])
+}

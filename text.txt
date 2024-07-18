@@ -1,0 +1,92 @@
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+const createUser = async () => {
+ try {
+   const newUsers = await prisma.departmentInformation.createMany({
+     data: [
+       {
+         deptId: "000-000-001",
+         deptCode: "cet",
+         department: "college of engineering",
+       },
+       {
+         deptId: "000-000-002",
+         deptCode: "cas",
+         department: "college of arts and science",
+       },
+       {
+         deptId: "000-000-003",
+         deptCode: "ced",
+         department: "college of education",
+       },
+       {
+         deptId: "000-000-004",
+         deptCode: "cba",
+         department: "college of business administration",
+       },
+       {
+         deptId: "000-000-005",
+         deptCode: "ccj",
+         department: "college of criminal justice",
+       },
+       {
+         deptId: "000-000-006",
+         deptCode: "shs",
+         department: "senior high school",
+       },
+       {
+         deptId: "000-000-007",
+         deptCode: "chs",
+         department: "college of health and science",
+       },
+       {
+         deptId: "000-000-008",
+         deptCode: "registar",
+         department: "registar",
+       },
+       {
+         deptId: "000-000-009",
+         deptCode: "clinic",
+         department: "clinic",
+       },
+       {
+         deptId: "000-000-010",
+         deptCode: "cashier",
+         department: "cashier",
+       },
+     ],
+   });
+ } catch (error) {
+   console.error("Error creating admins:", error);
+ }
+
+  return newUsers;
+};
+
+createUser();
+
+
+const createAdmin = async () => {
+  try {
+    const newAdmin = await prisma.adminInformation.createMany({
+      data: [
+        {
+          adminId: "111-111-111",
+          role: "APPROVER",
+        },
+        {
+          adminId: "000-000-000",
+          role: "RECEIVER",
+        },
+      ],
+    });
+
+    console.log(newAdmin);
+  } catch (error) {
+    console.error("Error creating admins:", error);
+  }
+};
+createAdmin();
+
+
+password = defaultpassword
