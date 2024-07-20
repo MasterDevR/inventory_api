@@ -27,7 +27,6 @@ const findUserByDeptId = async ({ username, password }) => {
     const authPassword = await authenticatePassword({ username, password });
     return authPassword;
   } catch (err) {
-    console.log("Caught Error on Authentifate-user.js file 2: ", err);
     return { status: 500, message: "Internal Server Error" };
   } finally {
     prisma.$disconnect();
@@ -43,13 +42,26 @@ const authenticatePassword = async ({ username, password }) => {
       where: {
         deptId: username,
       },
+      select: {
+        id: true,
+        deptId: true,
+        role: true,
+        password: true,
+      },
     });
+
     userData = findUser;
     // check in admin table if nothing found on department table
     if (!findUser) {
       const findAdmin = await prisma.adminInformation.findUnique({
         where: {
           adminId: username,
+        },
+        select: {
+          id: true,
+          adminId: true,
+          role: true,
+          password: true,
         },
       });
       userData = findAdmin;
@@ -59,14 +71,12 @@ const authenticatePassword = async ({ username, password }) => {
     if (!isMatch) {
       return { status: 401, message: "Invalid password." };
     }
-
     return { status: 200, userData };
   } catch (err) {
-    console.log("Caught Error on Authentifate-user.js file 1 : ", err);
-
     return {
       status: 500,
       message: "Internal Server Error. Please Contact Admin",
+      err,
     };
   } finally {
     prisma.$disconnect();

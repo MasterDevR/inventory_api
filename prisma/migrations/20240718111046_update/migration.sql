@@ -3,13 +3,15 @@ CREATE TABLE `departmentInformation` (
     `id` VARCHAR(191) NOT NULL,
     `image` VARCHAR(191) NULL,
     `deptId` VARCHAR(191) NOT NULL,
+    `role` ENUM('RECEIVER', 'APPROVER', 'DEPARMENT') NOT NULL,
     `deptCode` VARCHAR(191) NOT NULL,
     `department` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NULL,
-    `password` VARCHAR(191) NOT NULL DEFAULT 'defaultpassword',
+    `password` VARCHAR(191) NOT NULL DEFAULT '$2b$10$AHXIZcpN949uTqU/f3tUSO3gtax1At.AVO/PLhTZoOm4uRNy8USTC',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `departmentInformation_id_key`(`id`),
     UNIQUE INDEX `departmentInformation_deptId_key`(`deptId`),
     UNIQUE INDEX `departmentInformation_deptCode_key`(`deptCode`),
     UNIQUE INDEX `departmentInformation_department_key`(`department`),
@@ -22,12 +24,13 @@ CREATE TABLE `adminInformation` (
     `id` VARCHAR(191) NOT NULL,
     `image` VARCHAR(191) NULL,
     `adminId` VARCHAR(191) NOT NULL,
-    `role` ENUM('RECEIVER', 'APPROVER') NOT NULL,
+    `role` ENUM('RECEIVER', 'APPROVER', 'DEPARMENT') NOT NULL,
     `email` VARCHAR(191) NULL,
-    `password` VARCHAR(191) NOT NULL DEFAULT 'defaultpassword',
+    `password` VARCHAR(191) NOT NULL DEFAULT '$2b$10$AHXIZcpN949uTqU/f3tUSO3gtax1At.AVO/PLhTZoOm4uRNy8USTC',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `adminInformation_id_key`(`id`),
     UNIQUE INDEX `adminInformation_adminId_key`(`adminId`),
     UNIQUE INDEX `adminInformation_email_key`(`email`),
     PRIMARY KEY (`id`)
@@ -44,9 +47,11 @@ CREATE TABLE `stockInformation` (
     `preOrderPrint` VARCHAR(191) NOT NULL,
     `unitOfmeasurement` VARCHAR(191) NOT NULL,
     `quantity` INTEGER NOT NULL,
+    `supplier` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `stockInformation_id_key`(`id`),
     UNIQUE INDEX `stockInformation_stockNo_key`(`stockNo`),
     UNIQUE INDEX `stockInformation_preOrderPrint_key`(`preOrderPrint`),
     PRIMARY KEY (`id`)
@@ -67,6 +72,7 @@ CREATE TABLE `requestInformation` (
     `createAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `requestInformation_id_key`(`id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

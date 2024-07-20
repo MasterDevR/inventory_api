@@ -7,9 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum adminRole {
+enum role {
   RECEIVER
   APPROVER
+  DEPARMENT
 }
 
 enum supplyType {
@@ -30,24 +31,25 @@ model departmentInformation {
   id         String               @id @unique @default(uuid())
   image      String?
   deptId     String               @unique // Primary key
+  role       role
   deptCode   String               @unique
   department String               @unique
   email      String?              @unique
-  password   String               @default("defaultpassword")
+  password   String               @default("$2b$10$AHXIZcpN949uTqU/f3tUSO3gtax1At.AVO/PLhTZoOm4uRNy8USTC")
   createdAt  DateTime             @default(now())
   updatedAt  DateTime             @updatedAt
   Request    requestInformation[]
 }
 
 model adminInformation {
-  id        String    @id @unique @default(uuid())
+  id        String   @id @unique @default(uuid())
   image     String?
-  adminId   String    @unique // Primary key
-  role      adminRole
-  email     String?   @unique
-  password  String    @default("defaultpassword")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  adminId   String   @unique // Primary key
+  role      role
+  email     String?  @unique
+  password  String   @default("$2b$10$AHXIZcpN949uTqU/f3tUSO3gtax1At.AVO/PLhTZoOm4uRNy8USTC")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model stockInformation {
