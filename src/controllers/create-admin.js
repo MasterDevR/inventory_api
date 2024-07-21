@@ -15,8 +15,6 @@ const createAdmin = async () => {
         },
       ],
     });
-
-    console.log(newAdmin);
   } catch (error) {
     console.error("Error creating admins:", error);
   }

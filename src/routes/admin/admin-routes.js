@@ -8,8 +8,7 @@ router.get("/", (req, res) => {
 });
 
 router.post("/create-user", upload.none(), async (req, res) => {
-  const result = await createUserHandler(req.body);
-  console.log(result);
+  await createUserHandler(req.body);
   res.send("get all users");
 });
 module.exports = router;

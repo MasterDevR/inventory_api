@@ -2,19 +2,29 @@ const express = require("express");
 const router = express.Router();
 const authenticate = require("../../controllers/authenticate-user");
 const generateToken = require("../../utils/generate-token");
+const generateRefreshToken = require("../../utils/generate-refresh-token");
+const createRefreshToken = require("../../controllers/create-refresh-token");
 router.post("/", async (req, res) => {
   try {
     const user_credential = req.body;
     const response = await authenticate(user_credential);
-    // return if something is wrong
+
     if (response.status === 404 || response.status === 401) {
-      console.log(response);
       res.send(response);
       return;
     }
-    console.log(response);
-    // generateToken(response);
-    res.send(response);
+    const Token = await generateToken(response);
+    const refreshToken = await generateRefreshToken(response);
+
+    if (!Token && !refreshToken) {
+      res.send({ status: 200, message: "cannot create token" });
+    }
+    const { userData } = response;
+    await createRefreshToken(refreshToken, userData.role, userData.id);
+    res.send({
+      status: 200,
+      data: { response, Token: Token },
+    });
   } catch (err) {
     console.log(err);
 

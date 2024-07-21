@@ -1,22 +1,18 @@
-require("dotenv").config();
-
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const secretToken = process.env.SECRET_TOKEN;
 
 const generateToken = async (data) => {
-  console.log("token");
-  jwt.sign(
-    { data },
-    secretToken,
-    { algorithm: "RS256" },
-    function (err, token) {
-      if (err) {
-        console.log("ERROR ", err);
-      }
-      console.log(token);
-    }
-  );
+  try {
+    const { id, role } = data.userData;
+
+    const token = jwt.sign({ id, role }, secretToken, { expiresIn: "10s" });
+
+    return token;
+  } catch (error) {
+    console.log("ERROR:", error);
+  }
 };
 
 module.exports = generateToken;

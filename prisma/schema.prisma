@@ -10,7 +10,7 @@ datasource db {
 enum role {
   RECEIVER
   APPROVER
-  DEPARMENT
+  DEPARTMENT
 }
 
 enum supplyType {
@@ -28,28 +28,30 @@ enum requestStatus {
 }
 
 model departmentInformation {
-  id         String               @id @unique @default(uuid())
-  image      String?
-  deptId     String               @unique // Primary key
-  role       role
-  deptCode   String               @unique
-  department String               @unique
-  email      String?              @unique
-  password   String               @default("$2b$10$AHXIZcpN949uTqU/f3tUSO3gtax1At.AVO/PLhTZoOm4uRNy8USTC")
-  createdAt  DateTime             @default(now())
-  updatedAt  DateTime             @updatedAt
-  Request    requestInformation[]
+  id           String               @id @unique @default(uuid())
+  image        String?
+  deptId       String               @unique // Primary key
+  role         role
+  deptCode     String               @unique
+  department   String               @unique
+  email        String?              @unique
+  password     String               @default("$2b$10$AHXIZcpN949uTqU/f3tUSO3gtax1At.AVO/PLhTZoOm4uRNy8USTC")
+  refreshToken String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  Request      requestInformation[]
 }
 
 model adminInformation {
-  id        String   @id @unique @default(uuid())
-  image     String?
-  adminId   String   @unique // Primary key
-  role      role
-  email     String?  @unique
-  password  String   @default("$2b$10$AHXIZcpN949uTqU/f3tUSO3gtax1At.AVO/PLhTZoOm4uRNy8USTC")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @unique @default(uuid())
+  image        String?
+  adminId      String   @unique // Primary key
+  role         role
+  email        String?  @unique
+  password     String   @default("$2b$10$AHXIZcpN949uTqU/f3tUSO3gtax1At.AVO/PLhTZoOm4uRNy8USTC")
+  refreshToken String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model stockInformation {

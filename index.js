@@ -11,16 +11,19 @@ app.use(express.urlencoded({ extended: true }));
 // Route
 const adminRoutes = require("./src/routes/admin/admin-routes");
 const loginRoute = require("./src/routes/login/login-route");
+const logoutRoute = require("./src/routes/logout/logout");
 const settingRoutes = require("./src/routes/setting/setting-routes");
+const verifyTokenRoutes = require("./src/routes/token/validate-token");
 // protected routes
 app.use("/admin", adminRoutes);
 
 // public routes
 app.use("/login", loginRoute);
+app.use("/logout", logoutRoute);
 
 app.use("/setting", settingRoutes);
+app.use("/verify-token", verifyTokenRoutes);
 // server port
-
 const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
   console.log("Server is running on PORT : ", PORT);
