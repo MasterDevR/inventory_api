@@ -20,6 +20,7 @@ const findUserByDeptId = async ({ username, password }) => {
         adminId: true,
       },
     });
+
     if (!findUser && !findAdmin) {
       return { status: 404, message: "Invalid department ID." };
     }
@@ -27,6 +28,7 @@ const findUserByDeptId = async ({ username, password }) => {
     const authPassword = await authenticatePassword({ username, password });
     return authPassword;
   } catch (err) {
+    console.log("Caugtht : ", err.message);
     return { status: 500, message: "Internal Server Error" };
   } finally {
     prisma.$disconnect();
