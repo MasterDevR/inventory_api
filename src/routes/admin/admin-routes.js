@@ -1,39 +1,28 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
+// Configure multer storag
 
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(file.originalname);
-  },
-});
+const uploadImage = require("../../controllers/upload-inventory-image");
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: multer.memoryStorage() });
 
-router.post(
-  "/create-new-supply",
-  upload.fields([{ name: "image", maxCount: 1 }]),
-  (req, res) => {
-    console.log("im in");
-    try {
-      const files = req.files;
-      if (!files || !files.image) {
-        return res.status(400).send("No files uploaded.");
-      }
+router.post("/create-new-supply", upload.single("image"), async (req, res) => {
+  console.log("im in");
+  try {
+    // Log the request body fields
+    console.log("Request body: ", req.body);
 
-      console.log("File uploaded: ", files.image[0]);
-      console.log("Request body: ", req.body);
+    const result = await uploadImage(req.file, "item-image");
 
-      res.send("File uploaded successfully");
-    } catch (err) {
-      console.log("CAUGHT ERROR: ", err);
-      res.status(500).send("Internal Server Error");
-    }
+    // Log the uploaded file details
+    console.log("File uploaded: ", result);
+
+    res.send({ status: 200, path: result.downloadURL });
+  } catch (err) {
+    console.log("CAUGHT ERROR: ", err);
+    res.status(500).send("Internal Server Error");
   }
-);
+});
 
 module.exports = router;
