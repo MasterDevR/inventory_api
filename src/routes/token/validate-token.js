@@ -9,7 +9,6 @@ router.post("/", async (req, res) => {
     const { token } = req.body;
 
     if (!token) {
-      console.log("token is not valid : ", token);
       return res.status(200).send({ error: "Token is required", status: 400 });
     }
 

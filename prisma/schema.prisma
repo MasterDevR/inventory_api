@@ -44,6 +44,7 @@ model departmentInformation {
 
 model adminInformation {
   id           String   @id @unique @default(uuid())
+  department   String   @default("admin")
   image        String?
   adminId      String   @unique // Primary key
   role         role

@@ -1,4 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
+const { PrismaClient, role } = require("@prisma/client");
 const prisma = new PrismaClient();
 const bcrypt = require("bcrypt");
 
@@ -46,6 +46,7 @@ const authenticatePassword = async ({ username, password }) => {
         id: true,
         deptId: true,
         role: true,
+        deptCode: true,
         password: true,
       },
     });
@@ -62,6 +63,7 @@ const authenticatePassword = async ({ username, password }) => {
           adminId: true,
           role: true,
           password: true,
+          department: true,
         },
       });
       userData = findAdmin;
@@ -71,6 +73,7 @@ const authenticatePassword = async ({ username, password }) => {
     if (!isMatch) {
       return { status: 401, message: "Invalid password." };
     }
+
     return { status: 200, userData };
   } catch (err) {
     return {
