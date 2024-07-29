@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const authenticate = require("../../controllers/authenticate-user");
 const generateToken = require("../../utils/generate-token");
-const generateRefreshToken = require("../../utils/generate-refresh-token");
-const createRefreshToken = require("../../controllers/create-refresh-token");
 
 router.post("/", async (req, res) => {
   try {
