@@ -15,10 +15,6 @@ router.post("/", async (req, res) => {
 
     const Token = await generateToken(response.findUser);
 
-    if (!Token && !refreshToken) {
-      res.send({ status: 200, message: "cannot create token" });
-    }
-
     const filteredUserData = Object.fromEntries(
       Object.entries(response.findUser).filter(([key]) => key !== "password")
     );
@@ -26,7 +22,13 @@ router.post("/", async (req, res) => {
     console.log({ ...filteredUserData, accessToken: Token });
     res.send({
       status: 200,
-      data: { userData: { ...filteredUserData, accessToken: Token } },
+      data: {
+        userData: {
+          ...filteredUserData,
+          _id: filteredUserData.id,
+          accessToken: Token,
+        },
+      },
     });
   } catch (err) {
     console.log(err.message);
