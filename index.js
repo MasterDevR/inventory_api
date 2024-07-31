@@ -15,8 +15,9 @@ const logoutRoute = require("./src/routes/logout/logout");
 const settingRoutes = require("./src/routes/setting/setting-routes");
 const verifyTokenRoutes = require("./src/routes/token/validate-token");
 const validateToken = require("./src/routes/token/validate-token");
+const adminMiddleware = require("./src/middlewares/admin-middleware");
 // protected routes
-app.use("/admin", adminRoutes);
+app.use("/admin", adminMiddleware, adminRoutes);
 
 // public routes
 app.use("/validate-token", validateToken);
