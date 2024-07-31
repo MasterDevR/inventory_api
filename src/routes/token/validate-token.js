@@ -6,7 +6,7 @@ const secretToken = process.env.SECRET_TOKEN;
 
 router.post("/", async (req, res) => {
   try {
-    const { token } = req.body;
+    const token = req.headers.authorization.split(" ")[1];
 
     if (!token) {
       return res.status(200).send({ error: "Token is required", status: 400 });

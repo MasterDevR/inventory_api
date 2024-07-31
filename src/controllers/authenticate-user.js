@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 
 const findUserByDeptId = async ({ username, password }) => {
   try {
-    const findUser = await prisma.departmentInformation.findUnique({
+    const findUser = await prisma.userInformation.findUnique({
       where: {
         deptId: username,
       },
@@ -12,16 +12,8 @@ const findUserByDeptId = async ({ username, password }) => {
         deptId: true,
       },
     });
-    const findAdmin = await prisma.adminInformation.findUnique({
-      where: {
-        adminId: username,
-      },
-      select: {
-        adminId: true,
-      },
-    });
 
-    if (!findUser && !findAdmin) {
+    if (!findUser) {
       return { status: 404, message: "Invalid department ID." };
     }
 
@@ -40,43 +32,24 @@ const authenticatePassword = async ({ username, password }) => {
   let userData;
   try {
     // check department table
-    const findUser = await prisma.departmentInformation.findUnique({
+    const findUser = await prisma.userInformation.findUnique({
       where: {
         deptId: username,
       },
       select: {
         id: true,
-        deptId: true,
         role: true,
-        deptCode: true,
         password: true,
+        department: true,
       },
     });
 
-    userData = findUser;
-    // check in admin table if nothing found on department table
-    if (!findUser) {
-      const findAdmin = await prisma.adminInformation.findUnique({
-        where: {
-          adminId: username,
-        },
-        select: {
-          id: true,
-          adminId: true,
-          role: true,
-          password: true,
-          department: true,
-        },
-      });
-      userData = findAdmin;
-    }
-
-    const isMatch = await bcrypt.compare(password, userData.password);
+    const isMatch = await bcrypt.compare(password, findUser.password);
     if (!isMatch) {
       return { status: 401, message: "Invalid password." };
     }
 
-    return { status: 200, userData };
+    return { status: 200, findUser };
   } catch (err) {
     return {
       status: 500,

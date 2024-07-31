@@ -27,52 +27,45 @@ enum requestStatus {
   REJECTED
 }
 
-model departmentInformation {
-  id           String               @id @unique @default(uuid())
-  image        String?
-  deptId       String               @unique // Primary key
-  role         role
-  deptCode     String               @unique
-  department   String               @unique
-  email        String?              @unique
-  password     String               @default("$2b$10$AHXIZcpN949uTqU/f3tUSO3gtax1At.AVO/PLhTZoOm4uRNy8USTC")
-  refreshToken String?
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  Request      requestInformation[]
-}
-
-model adminInformation {
-  id           String   @id @unique @default(uuid())
-  department   String   @default("admin")
-  image        String?
-  adminId      String   @unique // Primary key
-  role         role
-  email        String?  @unique
-  password     String   @default("$2b$10$AHXIZcpN949uTqU/f3tUSO3gtax1At.AVO/PLhTZoOm4uRNy8USTC")
-  refreshToken String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model userInformation {
+  id         String               @id @unique @default(uuid())
+  name       String?
+  image      String?
+  deptId     String               @unique // Primary key
+  role       role
+  deptCode   String               @unique
+  department String               @unique
+  email      String?              @unique
+  password   String
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  Request    requestInformation[]
 }
 
 model stockInformation {
-  id                String               @id @unique @default(uuid())
-  image             String?
-  fund              String
-  itemName          String
-  description       String
-  stockNo           String               @unique // stock id/no
-  preOrderPrint     String               @unique
-  unitOfmeasurement String
-  quantity          Int
-  supplier          String
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-  requesitionForm   requestInformation[]
+  id              String   @id @unique @default(uuid())
+  item            String
+  price           Int
+  description     String
+  measurement     String
+  stockNo         String   @unique
+  reOrderPoint    String   @unique
+  quantity        Int
+  image           String
+  reference       String
+  consumeDate     Int
+  distributor     String
+  stockCounter    Int      @default(0)
+  priceList       Json
+  distributorList Json
+  qtyList         Json
+  dateList        Json
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model requestInformation {
-  id             String                @id @unique @default(uuid())
+  id             String          @id @unique @default(uuid())
   qty            Int
   unit           String
   description    String
@@ -82,8 +75,7 @@ model requestInformation {
   deptId         String
   requestType    supplyType?
   request_status requestStatus
-  createAt       DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
-  stock          stockInformation      @relation(fields: [stockNo], references: [stockNo])
-  request        departmentInformation @relation(fields: [deptId], references: [deptId])
+  createAt       DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  request        userInformation @relation(fields: [deptId], references: [deptId])
 }

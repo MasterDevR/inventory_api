@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const authenticate = require("../../controllers/authenticate-user");
 const generateToken = require("../../utils/generate-token");
-const generateRefreshToken = require("../../utils/generate-refresh-token");
-const createRefreshToken = require("../../controllers/create-refresh-token");
 
 router.post("/", async (req, res) => {
   try {
@@ -15,20 +13,23 @@ router.post("/", async (req, res) => {
       return;
     }
 
-    const Token = await generateToken(response);
+    const Token = await generateToken(response.findUser);
+
     if (!Token && !refreshToken) {
       res.send({ status: 200, message: "cannot create token" });
     }
 
     const filteredUserData = Object.fromEntries(
-      Object.entries(response.userData).filter(([key]) => key !== "password")
+      Object.entries(response.findUser).filter(([key]) => key !== "password")
     );
 
+    console.log({ ...filteredUserData, accessToken: Token });
     res.send({
       status: 200,
-      data: { useData: { ...filteredUserData, accessToken: Token } },
+      data: { userData: { ...filteredUserData, accessToken: Token } },
     });
   } catch (err) {
+    console.log(err.message);
     return {
       status: 500,
       message: "Internal Server Error. Please Contact Admin",
