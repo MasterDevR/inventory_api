@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const uploadImage = require("../../utils/upload-image");
 const createItem = require("../../service/create-item");
+const retrieveItem = require("../../service/retrieve-item");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -25,4 +26,10 @@ router.post("/create-new-supply", upload.single("image"), async (req, res) => {
   }
 });
 
+router.get(`/get-item`, async (req, res) => {
+  console.log("sfasdf");
+  const item = await retrieveItem();
+
+  res.send(item);
+});
 module.exports = router;

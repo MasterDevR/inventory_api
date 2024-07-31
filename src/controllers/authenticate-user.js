@@ -29,7 +29,6 @@ const findUserByDeptId = async ({ username, password }) => {
 
 // check password
 const authenticatePassword = async ({ username, password }) => {
-  let userData;
   try {
     // check department table
     const findUser = await prisma.userInformation.findUnique({
