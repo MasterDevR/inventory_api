@@ -27,7 +27,7 @@ enum requestStatus {
   REJECTED
 }
 
-model departmentInformation {
+model userInformation {
   id         String               @id @unique @default(uuid())
   image      String?
   deptId     String               @unique // Primary key
@@ -41,40 +41,26 @@ model departmentInformation {
   Request    requestInformation[]
 }
 
-model adminInformation {
-  id           String             @id @unique @default(uuid())
-  department   String             @default("admin")
-  image        String?
-  adminId      String             @unique // Primary key
-  role         role
-  email        String?            @unique
-  password     String
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  createdStock stockInformation[]
-}
-
 model stockInformation {
-  id             String           @id @unique @default(uuid())
-  price          Int
-  image          String
-  consumeDate    Int
-  reference      String
-  itemName       String
-  description    String
-  stockNo        String           @unique
-  reOrderPoint   String           @unique
-  measurement    String
-  quantity       Int
-  distributor    String
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  createdBy      String
-  createdByAdmin adminInformation @relation(fields: [createdBy], references: [id])
+  id           String   @id @unique @default(uuid())
+  price        Int
+  image        String
+  consumeDate  Int
+  reference    String
+  itemName     String
+  description  String
+  stockNo      String   @unique
+  reOrderPoint String   @unique
+  measurement  String
+  quantity     Int
+  distributor  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdBy    String
 }
 
 model requestInformation {
-  id             String                @id @unique @default(uuid())
+  id             String          @id @unique @default(uuid())
   qty            Int
   unit           String
   description    String
@@ -84,7 +70,7 @@ model requestInformation {
   deptId         String
   requestType    supplyType?
   request_status requestStatus
-  createAt       DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
-  request        departmentInformation @relation(fields: [deptId], references: [deptId])
+  createAt       DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  request        userInformation @relation(fields: [deptId], references: [deptId])
 }
