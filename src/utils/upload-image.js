@@ -8,9 +8,9 @@ const { initializeApp } = require("firebase/app");
 const config = require("../config/firebase.config");
 initializeApp(config);
 const storage = getStorage();
-const uploadImage = async (file) => {
+const uploadImage = async (file, folder) => {
   try {
-    const storageRef = ref(storage, `files/${file.originalname}`);
+    const storageRef = ref(storage, `${folder}/${file.originalname}`);
 
     const metaData = {
       contentType: file.mimetype,

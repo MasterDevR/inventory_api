@@ -11,14 +11,15 @@ const updateItem = async (itemData) => {
     });
 
     if (isExisting.length > 0) {
+      console.log(isExisting[0].quantity);
       await prisma.stock.update({
         where: {
           id: isExisting[0].id,
         },
         data: {
           price: +itemData.price,
-          quantity: +itemData.quantity,
-          distributor: itemData.distributor,
+          quantity: isExisting[0].quantity + +itemData.quantity,
+          distributor: itemData.distributor.toLowerCase(),
         },
       });
       await prisma.stock_history.create({

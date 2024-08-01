@@ -18,12 +18,10 @@ const validateToken = require("./src/routes/token/validate-token");
 const adminMiddleware = require("./src/middlewares/admin-middleware");
 // protected routes
 app.use("/admin", adminMiddleware, adminRoutes);
-
 // public routes
 app.use("/validate-token", validateToken);
 app.use("/login", loginRoute);
 app.use("/logout", logoutRoute);
-
 app.use("/setting", settingRoutes);
 app.use("/verify-token", verifyTokenRoutes);
 
