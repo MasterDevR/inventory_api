@@ -7,75 +7,109 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum role {
-  RECEIVER
-  APPROVER
-  DEPARTMENT
+model role {
+  id         String   @id @unique @default(uuid())
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user       user[]
 }
 
-enum supplyType {
-  OFFICE
-  OTHER
+model stock_type {
+  id         String   @id @unique @default(uuid())
+  name       String
+  created_At DateTime @default(now())
+  updated_at DateTime @updatedAt
+  stock      stock[]
 }
 
-enum requestStatus {
-  PENDING
-  REVIEWING
-  APPROVED
-  PREPARING
-  READY
-  REJECTED
+model transaction_status {
+  id           String        @id @unique @default(uuid())
+  name         String
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  transactions transaction[]
 }
 
-model userInformation {
-  id         String               @id @unique @default(uuid())
-  name       String?
-  image      String?
-  deptId     String               @unique // Primary key
-  role       role
-  deptCode   String               @unique
-  department String               @unique
-  email      String?              @unique
-  password   String
-  createdAt  DateTime             @default(now())
-  updatedAt  DateTime             @updatedAt
-  Request    requestInformation[]
+model transaction_purpose {
+  id           String        @id @unique @default(uuid())
+  name         String
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  transactions transaction[]
 }
 
-model stockInformation {
-  id              String   @id @unique @default(uuid())
-  item            String
-  price           Int
-  description     String
-  measurement     String
-  stockNo         String   @unique
-  reOrderPoint    String   @unique
-  quantity        Int
-  image           String
-  reference       String
-  consumeDate     Int
-  distributor     String
-  stockCounter    Int      @default(0)
-  priceList       Json
-  distributorList Json
-  qtyList         Json
-  dateList        Json
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+model user {
+  id              String        @id @unique @default(uuid())
+  name            String?
+  image           String?
+  department_id   String        @unique
+  role            String // FK
+  department_code String        @unique
+  department      String        @unique
+  email           String?       @unique
+  password        String
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+  Role            role          @relation(fields: [role], references: [id])
+  transaction     transaction[]
 }
 
-model requestInformation {
-  id             String          @id @unique @default(uuid())
-  qty            Int
-  unit           String
+model stock {
+  id             String   @id @unique @default(uuid())
+  item           String
+  price          Float
   description    String
-  remarks        String
-  purpose        String
-  stockNo        String
-  deptId         String
-  requestType    supplyType?
-  request_status requestStatus
-  createAt       DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  request        userInformation @relation(fields: [deptId], references: [deptId])
+  measurement    String
+  stock_no       String   @unique
+  re_order_point String   @unique
+  quantity       Int
+  image          String
+  reference      String
+  consume_date   Int
+  distributor    String
+  stock_counter  Int      @default(0) // total number of request or transaction per item
+  stock_type     String
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  stocktype      stock_type      @relation(fields: [stock_type], references: [id])
+  stockHistories stock_history[] //   one-to-many relationship
+}
+
+model stock_history {
+  id          String   @id @unique @default(uuid())
+  stock_id    String
+  price       Float
+  quantity    Int
+  distributor String
+  created_at  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  stock stock @relation(fields: [stock_id], references: [id])
+}
+
+model transaction {
+  id                  String   @id @unique @default(uuid())
+  item                String
+  price               Int
+  description         String
+  measurement         String
+  stockNo             String
+  reOrderPoint        String
+  quantity            Int
+  image               String
+  reference           String
+  consumeDate         Int
+  distributor         String
+  user_id             String // FK
+  status              String
+  transaction_purpose String
+  created_at          DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user   user?              @relation(fields: [user_id], references: [id])
+  Status transaction_status @relation(fields: [status], references: [id])
+
+  TransactionType transaction_purpose @relation(fields: [transaction_purpose], references: [id])
 }
