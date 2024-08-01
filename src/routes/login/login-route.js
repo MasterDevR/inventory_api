@@ -6,6 +6,7 @@ const generateToken = require("../../utils/generate-token");
 router.post("/", async (req, res) => {
   try {
     const { credentials } = req.body;
+    console.log(credentials);
     const response = await authenticate(credentials);
 
     if (response.status === 404 || response.status === 401) {

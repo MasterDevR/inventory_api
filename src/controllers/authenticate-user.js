@@ -4,12 +4,12 @@ const bcrypt = require("bcrypt");
 
 const findUserByDeptId = async ({ username, password }) => {
   try {
-    const findUser = await prisma.userInformation.findUnique({
+    const findUser = await prisma.user.findUnique({
       where: {
-        deptId: username,
+        department_id: username,
       },
       select: {
-        deptId: true,
+        department_id: true,
       },
     });
 
@@ -18,6 +18,7 @@ const findUserByDeptId = async ({ username, password }) => {
     }
 
     const authPassword = await authenticatePassword({ username, password });
+    console.log(authPassword);
     return authPassword;
   } catch (err) {
     console.log("Caugtht : ", err.message);
@@ -31,9 +32,9 @@ const findUserByDeptId = async ({ username, password }) => {
 const authenticatePassword = async ({ username, password }) => {
   try {
     // check department table
-    const findUser = await prisma.userInformation.findUnique({
+    const findUser = await prisma.user.findUnique({
       where: {
-        deptId: username,
+        department_id: username,
       },
       select: {
         id: true,
