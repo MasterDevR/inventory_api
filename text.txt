@@ -7,3 +7,9 @@ npx prisma generate // create shadow of database table
 npx prisma mirgrate dev --name // migrate the generated table into database
 
 npx prisma reset // reset database table
+
+
+
+git checkout //  go to branch
+git pull // pull commit on current branch
+git merge branch // merge branch 1 to current branch

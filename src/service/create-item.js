@@ -7,7 +7,6 @@ const createItem = async (itemData, imagePath) => {
     const result = await updateItem(itemData);
 
     if (result.status === 200) {
-      console.log("Item defined");
       return result;
     } else if (result.status === 404) {
       // Check if an item with the same stockNo already exists
