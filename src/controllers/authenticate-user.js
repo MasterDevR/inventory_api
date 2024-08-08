@@ -18,10 +18,8 @@ const findUserByDeptId = async ({ username, password }) => {
     }
 
     const authPassword = await authenticatePassword({ username, password });
-    console.log(authPassword);
     return authPassword;
   } catch (err) {
-    console.log("Caugtht : ", err.message);
     return { status: 500, message: "Internal Server Error" };
   } finally {
     prisma.$disconnect();
@@ -38,9 +36,13 @@ const authenticatePassword = async ({ username, password }) => {
       },
       select: {
         id: true,
-        role: true,
+        Role: {
+          select: {
+            name: true,
+          },
+        },
+        name: true,
         password: true,
-        department: true,
       },
     });
 

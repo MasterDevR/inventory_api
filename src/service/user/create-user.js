@@ -1,6 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const encrypPassword = require("../utils/encryp-password");
+const encrypPassword = require("../../utils/encryp-password");
 
 const createUser = async (userData) => {
   try {

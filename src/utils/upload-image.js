@@ -8,22 +8,40 @@ const { initializeApp } = require("firebase/app");
 const config = require("../config/firebase.config");
 initializeApp(config);
 const storage = getStorage();
-const uploadImage = async (file, folder) => {
+
+const uploadImage = async (files, folder) => {
   try {
-    const storageRef = ref(storage, `${folder}/${file.originalname}`);
+    // Convert files object to an array of values
+    const fileArray = Object.values(files);
 
-    const metaData = {
-      contentType: file.mimetype,
-    };
+    // Check if fileArray is not empty
+    if (fileArray.length === 0) {
+      throw new Error("No files to upload");
+    }
 
-    const snapshot = await uploadBytesResumable(
-      storageRef,
-      file.buffer,
-      metaData
-    );
-    const downloadURL = await getDownloadURL(snapshot.ref);
+    // Array to hold the download URLs
+    const downloadURLs = [];
 
-    return downloadURL;
+    for (let File of fileArray) {
+      for (let file = 0; file < File.length; file++) {
+        const storageRef = ref(storage, `${folder}/${File[file].originalname}`);
+
+        const metaData = {
+          contentType: File[file].mimetype,
+        };
+        const snapshot = await uploadBytesResumable(
+          storageRef,
+          File[file].buffer,
+          metaData
+        );
+        const downloadURL = await getDownloadURL(snapshot.ref);
+
+        downloadURLs.push(downloadURL);
+      }
+    }
+
+    // Return all download URLs
+    return downloadURLs;
   } catch (err) {
     console.log("Caught error on upload-image js : ", err.message);
     return null;

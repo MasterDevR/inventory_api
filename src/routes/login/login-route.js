@@ -6,7 +6,6 @@ const generateToken = require("../../utils/generate-token");
 router.post("/", async (req, res) => {
   try {
     const { credentials } = req.body;
-    console.log(credentials);
     const response = await authenticate(credentials);
 
     if (response.status === 404 || response.status === 401) {
@@ -20,7 +19,6 @@ router.post("/", async (req, res) => {
       Object.entries(response.findUser).filter(([key]) => key !== "password")
     );
 
-    console.log({ ...filteredUserData, accessToken: Token });
     res.send({
       status: 200,
       data: {
@@ -32,7 +30,6 @@ router.post("/", async (req, res) => {
       },
     });
   } catch (err) {
-    console.log(err.message);
     return {
       status: 500,
       message: "Internal Server Error. Please Contact Admin",

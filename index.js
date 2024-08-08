@@ -25,7 +25,7 @@ app.use("/logout", logoutRoute);
 app.use("/setting", settingRoutes);
 app.use("/verify-token", verifyTokenRoutes);
 
-// const craeteNewUser = require("./src/service/create-users");
+// const craeteNewUser = require("./src/service/user/create-user");
 // craeteNewUser();
 
 // // server port
