@@ -1,61 +1,48 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const updateItem = require("../service/update-item");
-
-const createItem = async (itemData, imagePath) => {
+const createItem = async (itemData) => {
   try {
-    const result = await updateItem(itemData);
-
-    if (result.status === 200) {
-      return result;
-    } else if (result.status === 404) {
-      // Check if an item with the same stockNo already exists
-      const existingItem = await prisma.stock.findUnique({
+    for (item of itemData) {
+      const stockType = await prisma.stock_type.findMany({
         where: {
-          stock_no: itemData.stock.toLowerCase(),
+          name: item.stockType,
+        },
+        select: {
+          id: true,
         },
       });
 
-      if (existingItem) {
-        return {
-          status: 409,
-          message:
-            "Stock Number and reOrderPoint must be unique to the other item.",
-        };
-      }
-      const newStock = await prisma.stock.create({
+      await prisma.stock.create({
         data: {
-          item: itemData.item.toLowerCase(),
-          image: imagePath,
-          price: +itemData.price,
-          description: itemData.description.toLowerCase(),
-          measurement: itemData.measurement.toLowerCase(),
-          stock_no: itemData.stock.toLowerCase(),
-          re_order_point: itemData.order.toLowerCase(),
-          quantity: +itemData.quantity,
-          reference: itemData.reference.toLowerCase(),
-          distributor: itemData.distributor.toLowerCase(),
-          consume_date: +itemData.consume,
-          stock_type: itemData.stockType,
+          item: item.name,
+          image: item.image,
+          price: +item.price,
+          description: item.description,
+          measurement: item.measurement,
+          stock_no: item.stock,
+          re_order_point: item.order,
+          quantity: +item.quantity,
+          reference: item.reference,
+          distributor: item.distributor,
+          consume_date: +item.consume,
+          stock_type: stockType[0].id,
         },
       });
       await prisma.stock_history.createMany({
         data: [
           {
-            stock_id: newStock.id,
-            price: newStock.price,
-            quantity: newStock.quantity,
-            distributor: newStock.distributor,
+            stock_no: item.stock,
+            price: +item.price,
+            quantity: +item.quantity,
+            distributor: item.distributor,
           },
         ],
       });
-
-      return { status: 201, message: "Item created successfully." };
-    } else {
-      return { status: result.status, message: result.message };
     }
+
+    return { status: 201, message: "Item created successfully." };
   } catch (error) {
-    console.error("Error creating or updating item:", error.message);
+    console.log(error.message);
     return { status: 500, message: error.message };
   }
 };

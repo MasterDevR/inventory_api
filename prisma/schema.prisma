@@ -12,6 +12,7 @@ model role {
   name       String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  // relation 
   user       user[]
 }
 
@@ -20,6 +21,7 @@ model stock_type {
   name       String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  // relation 
   stock      stock[]
 }
 
@@ -28,6 +30,7 @@ model transaction_status {
   name         String        @unique
   created_at   DateTime      @default(now())
   updated_at   DateTime      @updatedAt
+  // relation 
   transactions transaction[]
 }
 
@@ -36,6 +39,7 @@ model transaction_purpose {
   name         String
   created_at   DateTime      @default(now())
   updated_at   DateTime      @updatedAt
+  // relation 
   transactions transaction[]
 }
 
@@ -50,68 +54,61 @@ model user {
   email           String?       @unique
   password        String
   created_at      DateTime      @default(now())
+  // relation 
   updated_at      DateTime      @updatedAt
   Role            role          @relation(fields: [role], references: [id])
   transaction     transaction[]
 }
 
 model stock {
-  id             String   @id @unique @default(uuid())
-  item           String
-  price          Float
-  description    String
-  measurement    String
-  stock_no       String   @unique
-  re_order_point String   @unique
-  quantity       Int
-  image          String
-  reference      String
-  consume_date   Int
-  distributor    String
-  stock_counter  Int      @default(0)
-  stock_type     String
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
-
-  stocktype      stock_type      @relation(fields: [stock_type], references: [id])
-  stockHistories stock_history[] //   one-to-many relationship
-  transaction    transaction[]
+  id                     String          @id @unique @default(uuid())
+  item                   String
+  price                  Float
+  description            String
+  measurement            String
+  stock_no               String          @unique
+  re_order_point         String          @unique
+  quantity               Int
+  total_quantity_request Int             @default(0)
+  image                  String
+  reference              String
+  consume_date           Int
+  distributor            String
+  stock_counter          Int             @default(0)
+  stock_type             String
+  created_at             DateTime        @default(now())
+  updated_at             DateTime        @updatedAt
+  // relation 
+  stocktype              stock_type      @relation(fields: [stock_type], references: [id])
+  stockHistories         stock_history[] //   one-to-many relationship
+  transaction            transaction[]
 }
 
 model stock_history {
   id          String   @id @unique @default(uuid())
-  stock_id    String
+  stock_no    String
   price       Float
   quantity    Int
   distributor String
   created_at  DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  stock stock @relation(fields: [stock_id], references: [id], onDelete: Cascade)
+  // relation 
+  stock       stock    @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
 }
 
 model transaction {
-  id                  String   @id @unique @default(uuid())
-  item                String
-  price               Int
-  description         String
-  measurement         String
+  id                  String              @id @default(uuid())
+  transaction_id      String
   stock_no            String
-  re_order_point      String
   quantity            Int
-  image               String
-  reference           String
-  consume_date        Int
-  distributor         String
-  user_id             String // FK
+  department_id       String // FK
   status              String
   transaction_purpose String
-  created_at          DateTime @default(now())
-  updated_at          DateTime @updatedAt
-
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
   // relation 
-  stock           stock               @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
-  user            user                @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  Status          transaction_status  @relation(fields: [status], references: [id])
-  TransactionType transaction_purpose @relation(fields: [transaction_purpose], references: [id])
+  stock               stock               @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
+  user                user                @relation(fields: [department_id], references: [department_id], onDelete: Cascade)
+  Status              transaction_status  @relation(fields: [status], references: [id])
+  TransactionType     transaction_purpose @relation(fields: [transaction_purpose], references: [id])
 }

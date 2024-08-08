@@ -8,7 +8,7 @@ const getStockType = async () => {
     if (stockType.length <= 0) {
       return { status: 404, message: "Item Not Found" };
     } else {
-      return { status: 200, date: stockType };
+      return { status: 200, type: stockType };
     }
   } catch (error) {
     console.log(err.messsage);
