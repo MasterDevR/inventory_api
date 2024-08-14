@@ -12,14 +12,13 @@ const findStockByStockNo = async (stock_no, data) => {
       return { status: 404, message: "Invalid Stock Number." };
     }
 
-    console.log(stock.quantity + +data.quantity);
     await prisma.stock.update({
       where: {
         stock_no: stock_no,
       },
       data: {
         price: +data.price,
-        quantity: stock.quantity + data.quantity,
+        quantity: stock.quantity + +data.quantity,
         distributor: data.distributor,
       },
     });

@@ -3,28 +3,30 @@ const prisma = new PrismaClient();
 
 const checkMatches = async (itemData) => {
   try {
-    const stocks = await prisma.stock.findMany();
-    let status, message;
-    const results = itemData.map((item) => {
-      const matches = stocks.filter(
-        (stock) =>
-          stock.item === item.name ||
-          stock.description === item.description ||
-          stock.stock_no === item.stock_no
-      );
-
-      if (matches.length > 0) {
-        status = 403;
-        message = "Some Of Item Is Already Existing.";
-      } else {
-        status = 202;
-        message = "Item No Item Found";
-      }
+    const result = await prisma.stock.findMany({
+      where: {
+        OR: [
+          { item: itemData.name },
+          { stock_no: itemData.stock },
+          { description: itemData.description },
+        ],
+      },
     });
+
+    let status, message;
+
+    if (result.length > 0) {
+      status = 200;
+      message = "Item is already existing.";
+    } else {
+      status = 404;
+      message = "No matches found in the stock table.";
+    }
 
     return { status, message };
   } catch (error) {
     console.log(error.message);
+    return { status: 500, message: "Internal Server Error." };
   }
 };
 

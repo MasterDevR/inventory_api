@@ -85,15 +85,16 @@ model stock {
 }
 
 model stock_history {
-  id          String   @id @unique @default(uuid())
-  stock_no    String
-  price       Float
-  quantity    Int
-  distributor String
-  created_at  DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @unique @default(uuid())
+  stock_no      String
+  price         Float
+  quantity      Int
+  distributor   String
+  total_request Int      @default(0)
+  created_at    DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   // relation 
-  stock       stock    @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
+  stock         stock    @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
 }
 
 model transaction {

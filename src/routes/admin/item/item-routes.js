@@ -1,5 +1,8 @@
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+const { getStorage, ref, deleteObject } = require("firebase/storage");
 const createItem = require("../../../service/create-item");
-const checkMatches = require("../../../service/item/check-match-item");
+const checkMatchItem = require("../../../service/item/check-match-item");
 const UniquiItem = require("../../../utils/unique-item-checker");
 const uploadImage = require("../../../utils/upload-image");
 const getItems = require("../../../service/retrieve-item");
@@ -10,31 +13,20 @@ const addItemStock = require("../../../service/item/addItemStock");
 
 const createNewSupply = async (req, res) => {
   try {
-    const items = req.body.items;
-    const files = req.files;
+    const item = req.body;
+    const file = req.file;
     // check if has a item data
-    if (!files || Object.keys(files).length === 0 || items.length <= 0) {
+    if (!file || item === undefined) {
       return res.send({ status: 403, message: "Item Data Must Be inputted" });
     }
-
-    const objects = items.map((jsonString) => JSON.parse(jsonString));
-
-    // check if there's no duplicated in items[]
-    const isUnique = await UniquiItem(objects);
-    if (isUnique.status !== 200) {
-      return res.send(isUnique);
+    // check if item is existing
+    const isExisting = await checkMatchItem(item);
+    if (isExisting.status === 200 || isExisting.status === 500) {
+      return isExisting;
     }
 
-    // check if item in items[] is no similar data on the database.
-    const checkMactchItem = await checkMatches(objects);
-    if (checkMactchItem.status === 403) {
-      return res.send(checkMactchItem);
-    }
-    const itemImages = await uploadImage(req.files, "file");
-    const objectItem = objects.map((obj, index) => {
-      return { ...obj, image: itemImages[index] };
-    });
-    const result = await createItem(objectItem);
+    const imageURL = await uploadImage(req.file, "file");
+    const result = await createItem(item, imageURL);
     res.send(result);
   } catch (err) {
     console.log("CAUGHT ERROR /create-new-supply : ", err);
@@ -63,12 +55,12 @@ const stockType = async (req, res) => {
 };
 
 const removeItem = async (req, res) => {
-  const { stock_no, id } = req.params;
+  const { stock_no } = req.params;
   try {
     const findItemById = await findItem(stock_no);
 
     if (findItemById.status === 404) {
-      const result = await deleteItem(stock_no, id);
+      const result = await deleteItem(stock_no);
       res.send(result);
     } else {
       res.send(findItemById);
@@ -83,14 +75,190 @@ const addStock = async (req, res) => {
     const { stock_no } = req.params;
     const data = req.body;
     const result = await addItemStock(stock_no, data);
+    console.log(result);
     res.send(result);
   } catch (error) {
     res.send({ status: 500, message: "Internal Server Error." });
   }
 };
 
-const editItem = async (req, res) => {
-  const id = req.params;
+const getEditItem = async (req, res) => {
+  try {
+    const { stock_no } = req.params;
+    if (stock_no === undefined) {
+      return { status: 404, message: "Cannot find Stock number." };
+    }
+    const history = await prisma.stock_history.findFirst({
+      where: {
+        stock_no: stock_no,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+      select: {
+        quantity: true,
+      },
+    });
+    const stock = await prisma.stock.findUnique({
+      where: {
+        stock_no: stock_no,
+      },
+      select: {
+        item: true,
+        price: true,
+        description: true,
+        measurement: true,
+        stock_no: true,
+        re_order_point: true,
+        distributor: true,
+        consume_date: true,
+        reference: true,
+        image: true,
+      },
+    });
+    const itemData = [{ ...stock, quantity: history.quantity }];
+    if (stock.length <= 0) {
+      return { status: 404, message: "Cannot find Item." };
+    }
+    res.send({ status: 200, data: itemData });
+  } catch (error) {
+    console.log(error.message);
+    res.send({ status: 500, message: "Internal Server Error." });
+  }
+};
+
+const putEditItem = async (req, res) => {
+  try {
+    const { stock_no } = req.params;
+    const data = req.body;
+    const file = req.file;
+    let latestStockNo = stock_no;
+    if (!data || Object.keys(data).length !== 10) {
+      return res.send({
+        status: 404,
+        message: "Item canno be updated with an empty value.",
+      });
+    }
+
+    for (const i in data) {
+      if (data[i] === undefined || data[i] === "" || data[i] === null) {
+        return res.send({
+          status: 400,
+          message: "Item canno be updated with an empty value.",
+        });
+      }
+    }
+
+    // check if stock number modified
+    if (stock_no !== data.stock_no) {
+      latestStockNo = data.stock_no;
+      await prisma.$transaction(async (prisma) => {
+        await prisma.stock.update({
+          where: {
+            stock_no: stock_no,
+          },
+          data: {
+            stock_no: latestStockNo,
+          },
+        });
+        await prisma.stock_history.updateMany({
+          where: {
+            stock_no: stock_no,
+          },
+          data: {
+            stock_no: latestStockNo,
+          },
+        });
+      });
+    }
+
+    // find latest history
+    const latestHistory = await prisma.stock_history.findFirst({
+      where: {
+        stock_no: latestStockNo,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+
+    if (latestHistory) {
+      await prisma.stock_history.update({
+        where: {
+          id: latestHistory.id,
+        },
+        data: {
+          price: +data.price,
+          quantity: +data.quantity,
+          distributor: data.distributor,
+        },
+      });
+    }
+
+    const stockRecord = await prisma.stock.findUnique({
+      where: {
+        stock_no: latestStockNo,
+      },
+      select: {
+        total_quantity_request: true,
+      },
+    });
+
+    const totalQuantity = await prisma.stock_history.aggregate({
+      where: {
+        stock_no: latestStockNo,
+      },
+      _sum: {
+        quantity: true,
+      },
+    });
+
+    const latestQuantity =
+      totalQuantity._sum.quantity - stockRecord.total_quantity_request;
+
+    let itemImage = await prisma.stock.findUnique({
+      where: { stock_no: latestStockNo },
+      select: {
+        image: true,
+      },
+    });
+
+    if (file !== undefined) {
+      const storage = getStorage();
+
+      const filePath = itemImage.image
+        .split("/o/")[1]
+        .split("?")[0]
+        .replace(/%2F/g, "/");
+
+      const fileRef = ref(storage, filePath);
+      deleteObject(fileRef);
+
+      itemImage = await uploadImage(req.file, "file");
+    }
+
+    await prisma.stock.update({
+      where: {
+        stock_no: latestStockNo,
+      },
+      data: {
+        item: data.name,
+        price: +data.price,
+        quantity: latestQuantity,
+        description: data.description,
+        measurement: data.measurement,
+        re_order_point: data.order,
+        reference: data.reference,
+        consume_date: +data.consume,
+        distributor: data.distributor,
+        image: itemImage.image,
+      },
+    });
+
+    res.send({ status: 200, message: "Item Updated." });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 module.exports = {
@@ -99,5 +267,6 @@ module.exports = {
   stockType,
   removeItem,
   addStock,
-  editItem,
+  getEditItem,
+  putEditItem,
 };
