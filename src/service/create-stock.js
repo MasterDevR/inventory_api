@@ -5,6 +5,7 @@ const createItem = async (item, image) => {
     if (item === undefined || image === null) {
       return { status: 404, message: "Data not found." };
     }
+    console.log(new Date(item.date));
     const type = await prisma.stock_type.findFirst({
       where: {
         name: item.stockType,
@@ -27,6 +28,8 @@ const createItem = async (item, image) => {
         distributor: item.distributor,
         consume_date: +item.consume,
         stock_type: type.id,
+        created_at: new Date(item.date),
+        purchase_order: item.purchase_order,
       },
     });
     await prisma.stock_history.createMany({
@@ -36,6 +39,8 @@ const createItem = async (item, image) => {
           price: +item.price,
           quantity: +item.quantity,
           distributor: item.distributor,
+          created_at: new Date(item.date),
+          purchase_order: item.purchase_order,
         },
       ],
     });

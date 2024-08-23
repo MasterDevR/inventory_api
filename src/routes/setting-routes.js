@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const updatePassword = require("../../controllers/update-password");
+const updatePassword = require("../service/update-password");
 const bcrypt = require("bcrypt");
 
 router.post("/update-password", async (req, res) => {

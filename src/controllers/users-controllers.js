@@ -1,8 +1,8 @@
-const getAllUser = require("../../../service/user/get-all-user");
-const uploadImage = require("../../../utils/upload-image");
-const userRole = require("../../../service/user/get-user-role");
-const createUser = require("../../../service/user/create-user");
-const findUser = require("../../../service/user/find-user");
+const getAllUser = require("../service/get-all-user");
+const uploadImage = require("../utils/upload-image");
+const userRole = require("../service/get-user-role");
+const createUser = require("../service/create-user");
+const findUser = require("../service/find-user");
 
 const getUsers = async (req, res) => {
   try {

@@ -41,6 +41,7 @@ const authenticatePassword = async ({ username, password }) => {
             name: true,
           },
         },
+        department_id: true,
         name: true,
         password: true,
       },
