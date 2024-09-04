@@ -1,11 +1,11 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const createItem = async (item, image) => {
+  console.log(item);
   try {
     if (item === undefined || image === null) {
       return { status: 404, message: "Data not found." };
     }
-    console.log(new Date(item.date));
     const type = await prisma.stock_type.findFirst({
       where: {
         name: item.stockType,
@@ -23,7 +23,7 @@ const createItem = async (item, image) => {
         measurement: item.measurement,
         stock_no: item.stock,
         re_order_point: item.order,
-        quantity: +item.quantity,
+        quantity_on_hand: +item.quantity,
         reference: item.reference,
         distributor: item.distributor,
         consume_date: +item.consume,
@@ -37,7 +37,7 @@ const createItem = async (item, image) => {
         {
           stock_no: item.stock,
           price: +item.price,
-          quantity: +item.quantity,
+          quantity_on_hand: +item.quantity,
           distributor: item.distributor,
           created_at: new Date(item.date),
           purchase_order: item.purchase_order,
@@ -47,7 +47,7 @@ const createItem = async (item, image) => {
 
     return { status: 201, message: "Item Created." };
   } catch (error) {
-    console.log(error.message);
+    console.error(error);
     return { status: 500, message: "Internal Server Error." };
   }
 };

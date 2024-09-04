@@ -1,5 +1,3 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
 const createItem = require("../service/create-stock");
 const verifyStockExistance = require("../service/verify-stock-existance");
 const uploadImage = require("../utils/upload-image");
@@ -11,6 +9,8 @@ const AddStock = require("../service/add-stock");
 const GetEdticStock = require("../service/get-edit-stock");
 const updateEditedStock = require("../service/update-edit-stock");
 const GetTopStock = require("../service/get-top-stock");
+const GetStockReport = require("../service/get-stock-report");
+const getStockYearList = require("../service/get-stock-year-list");
 
 const createNewStock = async (req, res) => {
   try {
@@ -124,6 +124,41 @@ const getTopStock = async (req, res) => {
   const result = await GetTopStock();
   res.send(result);
 };
+const getItemReport = async (req, res) => {
+  try {
+    const { stock, year } = req.params; // Extract parameters from request
+    const result = await GetStockReport(stock, year);
+    res.send(result);
+  } catch (error) {
+    return { status: 500, message: "Something Went Wrong." };
+  }
+};
+
+const getStockYear = async (req, res) => {
+  try {
+    const result = await getStockYearList();
+
+    const items = result.map((entry) => ({
+      item: entry.item,
+      stock_no: entry.stock_no,
+    }));
+
+    const yearSet = new Set();
+    result.forEach((entry) => {
+      entry.stockHistories.forEach((history) => {
+        const date = new Date(history.created_at);
+        const year = date.getFullYear();
+        yearSet.add(year);
+      });
+    });
+
+    const years = Array.from(yearSet).sort();
+
+    res.send({ status: 200, items, years });
+  } catch (error) {
+    res.send({ status: 500, message: "Something Went Wrong." });
+  }
+};
 module.exports = {
   createNewStock,
   getStockList,
@@ -133,4 +168,6 @@ module.exports = {
   getEditStock,
   putEditedStock,
   getTopStock,
+  getItemReport,
+  getStockYear,
 };

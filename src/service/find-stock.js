@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 
 const findItem = async (stock_no) => {
   try {
-    const result = await prisma.transaction.findMany({
+    const result = await prisma.transaction_item.findMany({
       where: { stock_no },
     });
 

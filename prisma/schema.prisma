@@ -9,38 +9,36 @@ datasource db {
 
 model role {
   id         String   @id @unique @default(uuid())
-  name       String
+  name       String   @unique
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  // relation 
   user       user[]
 }
 
 model stock_type {
   id         String   @id @unique @default(uuid())
-  name       String
+  name       String   @unique
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  // relation 
   stock      stock[]
 }
 
 model transaction_status {
-  id           String        @id @unique @default(uuid())
-  name         String        @unique
-  created_at   DateTime      @default(now())
-  updated_at   DateTime      @updatedAt
-  // relation 
-  transactions transaction[]
+  id                      String                    @id @unique @default(uuid())
+  name                    String                    @unique
+  created_at              DateTime                  @default(now())
+  updated_at              DateTime                  @updatedAt
+  department_notification department_notification[]
+  transactions            transaction[]
 }
 
 model transaction_purpose {
-  id           String        @id @unique @default(uuid())
-  name         String
-  created_at   DateTime      @default(now())
-  updated_at   DateTime      @updatedAt
-  // relation 
-  transactions transaction[]
+  id                 String               @id @unique @default(uuid())
+  name               String               @unique
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @updatedAt
+  admin_notification admin_notification[]
+  transactions       transaction[]
 }
 
 model user {
@@ -48,69 +46,122 @@ model user {
   name            String?
   image           String?
   department_id   String        @unique
-  role            String // FK
+  role            String
   department_code String        @unique
   department      String        @unique
   email           String?       @unique
   password        String
   created_at      DateTime      @default(now())
-  // relation 
   updated_at      DateTime      @updatedAt
-  Role            role          @relation(fields: [role], references: [id])
   transaction     transaction[]
+  Role            role          @relation(fields: [role], references: [id])
+
+  @@index([role], map: "user_role_fkey")
 }
 
 model stock {
-  id                     String          @id @unique @default(uuid())
-  item                   String
-  price                  Float
-  description            String
-  measurement            String
-  stock_no               String          @unique
-  re_order_point         String          @unique
-  quantity               Int
-  total_quantity_request Int             @default(0)
-  image                  String
-  reference              String
-  consume_date           Int
-  distributor            String
-  purchase_order         String
-  stock_counter          Int             @default(0)
-  stock_type             String
-  created_at             DateTime        @default(now())
-  updated_at             DateTime        @updatedAt
-  // relation 
-  stocktype              stock_type      @relation(fields: [stock_type], references: [id])
-  stockHistories         stock_history[] //   one-to-many relationship
-  transaction            transaction[]
+  id               String             @id @unique @default(uuid())
+  item             String
+  price            Float
+  description      String
+  measurement      String
+  stock_no         String             @unique
+  re_order_point   String             @unique
+  image            String
+  reference        String
+  consume_date     Int
+  distributor      String
+  stock_counter    Int                @default(0)
+  stock_type       String
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+  purchase_order   String
+  quantity_issued  Int                @default(0)
+  quantity_on_hand Int?
+  purchase_request String?
+  stocktype        stock_type         @relation(fields: [stock_type], references: [id])
+  stockHistories   stock_history[]
+  transaction_item transaction_item[]
+
+  @@index([stock_type], map: "stock_stock_type_fkey")
 }
 
 model stock_history {
-  id             String   @id @unique @default(uuid())
-  stock_no       String
-  price          Float
-  quantity       Int
-  distributor    String
-  purchase_order String
-  total_request  Int      @default(0)
-  created_at     DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  // relation 
-  stock          stock    @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
+  id               String   @id @unique @default(uuid())
+  stock_no         String
+  price            Float
+  distributor      String
+  created_at       DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  total_request    Int      @default(0)
+  purchase_order   String
+  quantity_issued  Int      @default(0)
+  quantity_on_hand Int?
+  purchase_request String?
+  stock            stock    @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
+
+  @@index([stock_no], map: "stock_history_stock_no_fkey")
 }
 
 model transaction {
+  id                      String                    @id @default(uuid())
+  department_id           String
+  status                  String
+  transaction_purpose     String
+  created_at              DateTime                  @default(now())
+  updated_at              DateTime                  @updatedAt
+  admin_notification      admin_notification[]
+  department_notification department_notification[]
+  user                    user                      @relation(fields: [department_id], references: [department_id], onDelete: Cascade)
+  Status                  transaction_status        @relation(fields: [status], references: [id])
+  TransactionType         transaction_purpose       @relation(fields: [transaction_purpose], references: [id])
+  transaction_item        transaction_item[]
+
+  @@index([department_id], map: "transaction_department_id_fkey")
+  @@index([status], map: "transaction_status_fkey")
+  @@index([transaction_purpose], map: "transaction_transaction_purpose_fkey")
+}
+
+model transaction_item {
+  id                String      @id @default(uuid())
+  transaction_id    String
+  stock_no          String
+  quantity          Int
+  approved_quantity Int         @default(0)
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
+  stock             stock       @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
+  Transaction       transaction @relation(fields: [transaction_id], references: [id])
+
+  @@index([stock_no], map: "transaction_item_stock_no_fkey")
+  @@index([transaction_id], map: "transaction_item_transaction_id_fkey")
+}
+
+model admin_notification {
   id                  String              @id @default(uuid())
-  stock_no            String
-  quantity            Int
-  department_id       String // FK
-  status              String
+  transaction_id      String
+  department          String
   transaction_purpose String
+  no_item             Int
   created_at          DateTime            @default(now())
   updated_at          DateTime            @updatedAt
-  // relation 
-  stock               stock               @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
-  user                user                @relation(fields: [department_id], references: [department_id], onDelete: Cascade)
-  Status              transaction_status  @relation(fields: [status], references: [id])
-  TransactionType     transaction_purpose @relation(fields: [transaction_purpose], references: [id])
+  viewed              Boolean             @default(false)
+  Transaction         transaction         @relation(fields: [transaction_id], references: [id])
+  TransactionType     transaction_purpose @relation(fields: [transaction_purpose], references: [name])
+
+  @@index([transaction_id], map: "admin_notification_transaction_id_fkey")
+  @@index([transaction_purpose], map: "admin_notification_transaction_purpose_fkey")
+}
+
+model department_notification {
+  id             String             @id @default(uuid())
+  status         String
+  transaction_id String
+  created_at     DateTime           @default(now())
+  updated_at     DateTime           @updatedAt
+  Status         transaction_status @relation(fields: [status], references: [name])
+  Transaction    transaction        @relation(fields: [transaction_id], references: [id])
+
+  @@index([status], map: "department_notification_status_fkey")
+  @@index([transaction_id], map: "department_notification_transaction_id_fkey")
 }
