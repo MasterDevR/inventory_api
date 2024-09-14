@@ -87,18 +87,19 @@ model stock {
 }
 
 model stock_history {
-  id               String   @id @unique @default(uuid())
+  id               String             @id @unique @default(uuid())
   stock_no         String
   price            Float
   distributor      String
-  created_at       DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  total_request    Int      @default(0)
+  created_at       DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  total_request    Int                @default(0)
   purchase_order   String
-  quantity_issued  Int      @default(0)
+  quantity_issued  Int                @default(0)
   quantity_on_hand Int?
   purchase_request String?
-  stock            stock    @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
+  stock            stock              @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
+  transaction_item transaction_item[]
 
   @@index([stock_no], map: "stock_history_stock_no_fkey")
 }
@@ -123,15 +124,17 @@ model transaction {
 }
 
 model transaction_item {
-  id                String      @id @default(uuid())
+  id                String         @id @default(uuid())
+  history_id        String?
   transaction_id    String
   stock_no          String
   quantity          Int
-  approved_quantity Int         @default(0)
-  created_at        DateTime    @default(now())
-  updated_at        DateTime    @updatedAt
-  stock             stock       @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
-  Transaction       transaction @relation(fields: [transaction_id], references: [id])
+  approved_quantity Int            @default(0)
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+  stock             stock          @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
+  Transaction       transaction    @relation(fields: [transaction_id], references: [id])
+  History_id        stock_history? @relation(fields: [history_id], references: [id])
 
   @@index([stock_no], map: "transaction_item_stock_no_fkey")
   @@index([transaction_id], map: "transaction_item_transaction_id_fkey")

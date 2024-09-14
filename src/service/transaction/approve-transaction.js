@@ -33,17 +33,7 @@ module.exports = async (data) => {
       i++;
     }
 
-    for (const i in items) {
-      const item = items[i];
-      await prisma.transaction_item.update({
-        where: {
-          id: item.item_id,
-          transaction_id: item.transaction_id,
-        },
-        data: {
-          approved_quantity: item.approved_quantity,
-        },
-      });
+    const promises = items.map(async (item) => {
       const history = await prisma.stock_history.findMany({
         where: {
           stock_no: item.stock_no,
@@ -51,44 +41,67 @@ module.exports = async (data) => {
             gt: 0,
           },
         },
+        select: {
+          id: true,
+          quantity_on_hand: true,
+          quantity_issued: true,
+        },
         take: 2,
       });
-      const filteredHistory = history.reduce(
-        (result, current, index, array) => {
-          if (index > 0 && array[index - 1].quantity_on_hand > 0) {
-            return result;
-          }
-          result.push(current);
-          return result;
-        },
-        []
-      );
-      for (const i in filteredHistory) {
-        const historyToUpdate = filteredHistory[i];
-        const result = await prisma.stock_history.update({
-          where: {
-            id: historyToUpdate.id,
-          },
-          data: {
-            quantity_on_hand:
-              historyToUpdate.quantity_on_hand - item.approved_quantity,
-            quantity_issued:
-              historyToUpdate.quantity_issued + item.approved_quantity,
-          },
-        });
+
+      let historyToUpdate;
+      if (history[0].quantity_on_hand > item.approved_quantity) {
+        historyToUpdate = history[0];
+      } else {
+        historyToUpdate = history[1];
       }
-      const res = await prisma.stock.update({
+
+      const stockHistoryUpdate = prisma.stock_history.update({
+        where: {
+          id: historyToUpdate.id,
+        },
+        data: {
+          quantity_on_hand:
+            historyToUpdate.quantity_on_hand - item.approved_quantity,
+          quantity_issued:
+            historyToUpdate.quantity_issued + item.approved_quantity,
+          total_request: item.quantity,
+        },
+      });
+
+      const transactionItemUpdate = prisma.transaction_item.update({
+        where: {
+          id: item.item_id,
+          transaction_id: item.transaction_id,
+        },
+        data: {
+          history_id: historyToUpdate.id,
+          approved_quantity: item.approved_quantity,
+        },
+      });
+
+      const stockUpdate = prisma.stock.update({
         where: {
           stock_no: item.stock_no,
         },
         data: {
-          quantity_on_hand: --item.approved_quantity,
-          quantity_issued: ++item.approved_quantity,
+          quantity_on_hand: { decrement: item.approved_quantity },
+          quantity_issued: { increment: item.approved_quantity },
         },
       });
-    }
+
+      return Promise.all([
+        stockHistoryUpdate,
+        transactionItemUpdate,
+        stockUpdate,
+      ]);
+    });
+
+    await Promise.all(promises);
+
     return { status: 200, message: "Transaction Approved" };
   } catch (error) {
+    console.log(error.message);
     return { status: 500, message: "Something went wrong." };
   }
 };

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const authenticate = require("../service/authenticate-user");
+const authenticate = require("../service/user/authenticate-user");
 const generateToken = require("../utils/generate-token");
 
 router.post("/", async (req, res) => {
@@ -25,6 +25,7 @@ router.post("/", async (req, res) => {
         userData: {
           ...filteredUserData,
           _id: filteredUserData.id,
+          image: filteredUserData.image,
           accessToken: Token,
         },
       },

@@ -9,6 +9,9 @@ const transactionReject = require("../service/transaction/reject-transaction");
 const createAdminNotification = require("../service/notification/create-admin-notification");
 const searchTransaction = require("../service/transaction/search-transaction");
 const getTransactionsByStatusAndSearch = require("../service/transaction/get-all-transaction-by-status-and-search_data");
+const transactionReady = require("../service/transaction/ready-transaction");
+const { json } = require("express");
+
 const getAllTransaction = async (req, res) => {
   let result;
   try {
@@ -27,7 +30,6 @@ const getAllTransaction = async (req, res) => {
     } else if (search_data !== "undefined" && status === "undefined") {
       result = await searchTransaction(search_data);
     } else if (status && search_data) {
-      console.log(status, search_data);
       result = await getTransactionsByStatusAndSearch(status, search_data);
     }
 
@@ -44,20 +46,34 @@ const getAllTransaction = async (req, res) => {
 
 const createTransaction = async (req, res) => {
   try {
-    const { data, purpose } = req.body;
+    const data = req.body;
     const { departmentId } = req.params;
-    console.log(data, purpose);
-    const result = await CreateTransaction(data, purpose, departmentId);
+
+    const purpose = data.purpose || data[5];
+    const combinedData =
+      data.quantity.length > 1
+        ? data.description?.map((desc, index) => ({
+            item: data.item[index],
+            description: desc,
+            price: data.price[index],
+            stock: data.stock[index],
+            quantity: data.quantity[index],
+          }))
+        : data;
+
+    const result = await CreateTransaction(combinedData, purpose, departmentId);
     if (result.status === 200) {
       await createAdminNotification(
-        (size = data.length),
+        data.quantity.length,
         purpose,
         departmentId,
-        (id = result.id)
+        result.id
       );
     }
+
     res.send(result);
   } catch (error) {
+    console.log(error.message);
     return { status: 500, message: "Someting Went Wrong." };
   }
 };
@@ -73,12 +89,10 @@ const getTransactionPurpose = async (req, res) => {
 const approveTransaction = async (req, res) => {
   try {
     const obj = Object.assign({}, req.body);
-
     const result = await Transaction(obj);
-    console.log(result);
     res.send(result);
   } catch (error) {
-    console.log(error.message);
+    res.send({ status: 500, message: "Something went wrong." });
   }
 };
 const rejectTransaction = async (req, res) => {
@@ -87,7 +101,16 @@ const rejectTransaction = async (req, res) => {
     const result = await transactionReject(data);
     res.send(result);
   } catch (error) {
-    console.log(error.message);
+    res.send({ status: 500, message: "Something went wrong." });
+  }
+};
+const readyTransaction = async (req, res) => {
+  try {
+    const data = Object.assign({}, req.body);
+    const result = await transactionReady(data);
+    res.send(result);
+  } catch (error) {
+    res.send({ status: 500, message: "Something went wrong." });
   }
 };
 const getAllTransactionStatus = async (req, res) => {
@@ -104,7 +127,7 @@ const getAllTransactionStatus = async (req, res) => {
     result.unshift(allRecord);
     res.send({ status: 200, result });
   } catch (error) {
-    console.log(error.message);
+    res.send({ status: 500, message: "Something went wrong." });
   }
 };
 module.exports = {
@@ -114,4 +137,5 @@ module.exports = {
   approveTransaction,
   rejectTransaction,
   getAllTransactionStatus,
+  readyTransaction,
 };

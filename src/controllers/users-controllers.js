@@ -1,8 +1,8 @@
-const getAllUser = require("../service/get-all-user");
+const getAllUser = require("../service/user/get-all-user");
 const uploadImage = require("../utils/upload-image");
-const userRole = require("../service/get-user-role");
-const createUser = require("../service/create-user");
-const findUser = require("../service/find-user");
+const userRole = require("../service/user/get-user-role");
+const createUser = require("../service/user/create-user");
+const findUser = require("../service/user/find-user");
 
 const getUsers = async (req, res) => {
   try {
@@ -42,10 +42,9 @@ const createNewUser = async (req, res) => {
     const isExisting = await findUser(userData);
     if (isExisting.status === 404) {
       await createUser({ ...userData, imageSrc });
-      res.send({ status: 200, message: "User created successfully" });
+      return res.send({ status: 200, message: "User created successfully" });
     }
 
-    console.log(isExisting);
     res.send({
       status: 403,
       message: "Creation Failed. User Is Already Existing.",

@@ -11,7 +11,7 @@ module.exports = async (size, purpose, departmentId, id) => {
         department: true,
       },
     });
-    const admin = await prisma.admin_notification.create({
+    await prisma.admin_notification.create({
       data: {
         no_item: size,
         department: user.department,
@@ -19,9 +19,9 @@ module.exports = async (size, purpose, departmentId, id) => {
         transaction_id: id,
       },
     });
-    console.table(admin);
     return;
   } catch (error) {
     console.log(error.message);
+    return { status: 500, message: "Something went wrong." };
   }
 };

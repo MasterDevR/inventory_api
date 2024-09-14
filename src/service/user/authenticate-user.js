@@ -10,6 +10,7 @@ const findUserByDeptId = async ({ username, password }) => {
       },
       select: {
         department_id: true,
+        image: true,
       },
     });
 

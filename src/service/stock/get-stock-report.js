@@ -11,6 +11,7 @@ const getStockReport = async (item, year) => {
         stock_no: true,
       },
     });
+
     const result = await prisma.stock_history.findMany({
       where: {
         stock_no: stockNo.stock_no,

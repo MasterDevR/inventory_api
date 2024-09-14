@@ -11,7 +11,7 @@ const getEditStock = async (stock_no) => {
         created_at: "desc",
       },
       select: {
-        quantity: true,
+        quantity_on_hand: true,
       },
     });
     const stock = await prisma.stock.findUnique({
@@ -31,7 +31,7 @@ const getEditStock = async (stock_no) => {
         image: true,
       },
     });
-    const itemData = [{ ...stock, quantity: history.quantity }];
+    const itemData = [{ ...stock, quantity_on_hand: history.quantity_on_hand }];
     if (stock.length <= 0) {
       return { status: 404, message: "Cannot find Item." };
     }

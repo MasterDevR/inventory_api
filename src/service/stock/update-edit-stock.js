@@ -37,25 +37,23 @@ const updateEditedStock = async (stock_no, data, file) => {
       },
     });
 
-    if (latestHistory) {
-      await prisma.stock_history.update({
-        where: {
-          id: latestHistory.id,
-        },
-        data: {
-          price: +data.price,
-          quantity: +data.quantity,
-          distributor: data.distributor,
-        },
-      });
-    }
+    await prisma.stock_history.update({
+      where: {
+        id: latestHistory.id,
+      },
+      data: {
+        price: +data.price,
+        quantity_on_hand: +data.quantity,
+        distributor: data.distributor,
+      },
+    });
 
     const stockRecord = await prisma.stock.findUnique({
       where: {
         stock_no: latestStockNo,
       },
       select: {
-        total_quantity_request: true,
+        quantity_issued: true,
       },
     });
 
@@ -64,12 +62,12 @@ const updateEditedStock = async (stock_no, data, file) => {
         stock_no: latestStockNo,
       },
       _sum: {
-        quantity: true,
+        quantity_on_hand: true,
       },
     });
 
     const latestQuantity =
-      totalQuantity._sum.quantity - stockRecord.total_quantity_request;
+      totalQuantity._sum.quantity_on_hand - stockRecord.quantity_issued;
 
     let itemImage = await prisma.stock.findUnique({
       where: { stock_no: latestStockNo },
@@ -99,7 +97,7 @@ const updateEditedStock = async (stock_no, data, file) => {
       data: {
         item: data.name,
         price: +data.price,
-        quantity: latestQuantity,
+        quantity_on_hand: latestQuantity,
         description: data.description,
         measurement: data.measurement,
         re_order_point: data.order,
@@ -112,6 +110,7 @@ const updateEditedStock = async (stock_no, data, file) => {
 
     return { status: 200, message: "Item Updated." };
   } catch (error) {
+    console.log(error.message);
     return { status: 500, message: error.message };
   }
 };

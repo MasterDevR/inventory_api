@@ -29,7 +29,8 @@ module.exports = async (data, purpose, departmentId) => {
         created_at: dateNow,
       },
     });
-    for (const item of data) {
+    const dataArray = Array.isArray(data) ? data : [data];
+    const promises = dataArray.map(async (item) => {
       await prisma.transaction_item.create({
         data: {
           transaction_id: transaction.id,
@@ -38,34 +39,18 @@ module.exports = async (data, purpose, departmentId) => {
           created_at: dateNow,
         },
       });
+    });
 
-      const history = await prisma.stock_history.findFirst({
-        where: {
-          stock_no: item.stock,
-        },
-        orderBy: {
-          created_at: "desc",
-        },
-      });
-      await prisma.stock_history.updateMany({
-        where: {
-          id: history.id,
-          stock_no: item.stock,
-        },
-        data: {
-          total_request: {
-            increment: +item.quantity,
-          },
-        },
-      });
-    }
+    await Promise.all(promises);
+
     return {
       status: 200,
       message: "Item Requested Successfuly.",
       id: transaction.id,
     };
   } catch (error) {
-    console.error(error.message);
-    return { status: 500, message: "Something Went Wrong." };
+    console.log(error.message);
+
+    return { status: 500, message: "Something went wrong." };
   }
 };

@@ -1,17 +1,19 @@
-const createItem = require("../service/create-stock");
-const verifyStockExistance = require("../service/verify-stock-existance");
-const uploadImage = require("../utils/upload-image");
-const GetStockList = require("../service/get-stock-list");
-const getStockType = require("../service/get-stock-type");
-const deleteStock = require("../service/delete-stock");
-const findStock = require("../service/find-stock");
-const AddStock = require("../service/add-stock");
-const GetEdticStock = require("../service/get-edit-stock");
-const updateEditedStock = require("../service/update-edit-stock");
-const GetTopStock = require("../service/get-top-stock");
-const GetStockReport = require("../service/get-stock-report");
-const getStockYearList = require("../service/get-stock-year-list");
-
+const createItem = require("../stock/create-stock");
+const verifyStockExistance = require("../stock/verify-stock-existance");
+const uploadImage = require("../../utils/upload-image");
+const GetStockList = require("../stock/get-stock-list");
+const searchItem = require("../stock/search-item");
+const getStockType = require("../stock/get-stock-type");
+const deleteStock = require("../stock/delete-stock");
+const findStock = require("../stock/find-stock");
+const AddStock = require("../stock/add-stock");
+const GetEdticStock = require("../stock/get-edit-stock");
+const updateEditedStock = require("../stock/update-edit-stock");
+const stats = require("../stock/stats");
+const GetStockReport = require("../stock/get-stock-report");
+const getStockYearList = require("../stock/get-stock-year-list");
+const StockDetails = require("../stock/stock-details");
+const stockAllocation = require("../stock/get-stock-allocation");
 const createNewStock = async (req, res) => {
   try {
     const item = req.body;
@@ -35,14 +37,28 @@ const createNewStock = async (req, res) => {
 
 const getStockList = async (req, res) => {
   try {
-    const result = await GetStockList();
+    const { search_item } = req.params;
+    let result;
+    if (search_item === "undefined" || search_item > 0) {
+      result = await GetStockList();
+    } else {
+      result = await searchItem(search_item);
+    }
     res.send(result);
   } catch (err) {
     console.log("Caught Error  /get-item: ", err.message);
     res.send({ status: 500, message: "Internal Server Error" });
   }
 };
-
+const getAvailableStock = async (req, res) => {
+  try {
+    const { searchItem } = req.params;
+    const result = await GetStockList(searchItem);
+    res.send(result);
+  } catch (err) {
+    res.send({ status: 500, message: "Internal Server Error" });
+  }
+};
 const stockType = async (req, res) => {
   try {
     const result = await getStockType();
@@ -87,7 +103,7 @@ const getEditStock = async (req, res) => {
     if (stock_no === undefined) {
       return { status: 404, message: "Cannot find Stock number." };
     }
-    const result = GetEdticStock(stock_no);
+    const result = await GetEdticStock(stock_no);
     res.send(result);
   } catch (error) {
     console.log(error.message);
@@ -114,19 +130,19 @@ const putEditedStock = async (req, res) => {
         });
       }
     }
-    const result = updateEditedStock(stock_no, data, file);
+    const result = await updateEditedStock(stock_no, data, file);
     res.send(result);
   } catch (error) {
     console.log(error);
   }
 };
-const getTopStock = async (req, res) => {
-  const result = await GetTopStock();
+const getStats = async (req, res) => {
+  const result = await stats();
   res.send(result);
 };
 const getItemReport = async (req, res) => {
   try {
-    const { stock, year } = req.params; // Extract parameters from request
+    const { stock, year } = req.params;
     const result = await GetStockReport(stock, year);
     res.send(result);
   } catch (error) {
@@ -136,27 +152,44 @@ const getItemReport = async (req, res) => {
 
 const getStockYear = async (req, res) => {
   try {
-    const result = await getStockYearList();
+    let result = await getStockYearList();
 
-    const items = result.map((entry) => ({
-      item: entry.item,
-      stock_no: entry.stock_no,
-    }));
-
-    const yearSet = new Set();
-    result.forEach((entry) => {
-      entry.stockHistories.forEach((history) => {
-        const date = new Date(history.created_at);
-        const year = date.getFullYear();
-        yearSet.add(year);
-      });
+    result = result.map((stock) => {
+      return {
+        ...stock,
+        stockHistories: stock.stockHistories.map((history) => {
+          const createdAt = new Date(history.created_at);
+          return {
+            name: createdAt.getFullYear().toString(),
+          };
+        }),
+      };
     });
 
-    const years = Array.from(yearSet).sort();
-
-    res.send({ status: 200, items, years });
+    res.send({ status: 200, result });
   } catch (error) {
     res.send({ status: 500, message: "Something Went Wrong." });
+  }
+};
+const getStockDetails = async (req, res) => {
+  try {
+    const { stockno } = req.params;
+    const result = await StockDetails(stockno);
+
+    res.send(result);
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const getStockAllocation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await stockAllocation(id);
+
+    res.send(result);
+  } catch (error) {
+    console.log(error.message);
   }
 };
 module.exports = {
@@ -167,7 +200,10 @@ module.exports = {
   addStock,
   getEditStock,
   putEditedStock,
-  getTopStock,
+  getStats,
   getItemReport,
   getStockYear,
+  getStockDetails,
+  getAvailableStock,
+  getStockAllocation,
 };

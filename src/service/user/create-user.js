@@ -1,25 +1,29 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const encrypPassword = require("../utils/encryp-password");
+const encrypPassword = require("../../utils/encryp-password");
 
 const createUser = async (userData) => {
   try {
     const password = await encrypPassword(userData.password);
-    await prisma.user.createMany({
+    const userRole = await prisma.role.findFirst({
+      where: {
+        name: userData.role,
+      },
+    });
+    await prisma.user.create({
       data: {
         name: userData.username,
-        email: userData.email,
+        email: userData.Email,
         department_id: userData.department_id,
         department_code: userData.department_code,
         department: userData.department,
-        role: userData.role,
-        image: userData.image,
+        role: userRole.id,
+        image: userData.imageSrc,
         password: password,
       },
     });
     return 200;
   } catch (error) {
-    console.error("Error creating users:", error.message);
     return { status: 500, message: "Internal Server Error." };
   }
 };
