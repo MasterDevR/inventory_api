@@ -5,6 +5,7 @@ module.exports = async () => {
   try {
     const result = await prisma.transaction.findMany({
       select: {
+        ris: true,
         id: true,
         created_at: true,
         department_id: true,
@@ -36,6 +37,7 @@ module.exports = async () => {
               select: {
                 item: true,
                 price: true,
+                measurement: true,
               },
             },
           },

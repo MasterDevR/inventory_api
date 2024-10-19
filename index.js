@@ -15,10 +15,10 @@ const logoutRoute = require("./src/routes/logout-route");
 const settingRoutes = require("./src/routes/setting-routes");
 const verifyTokenRoutes = require("./src/routes/validate-token");
 const validateToken = require("./src/routes/validate-token");
-const adminMiddleware = require("./src/middlewares/admin-middleware");
+const tokenValidator = require("./src/middlewares/admin-middleware");
 
-app.use("/admin", adminMiddleware, adminRoutes);
-app.use("/user", adminMiddleware, usersRoutes);
+app.use("/admin", tokenValidator, adminRoutes);
+app.use("/user", tokenValidator, usersRoutes);
 app.use("/validate-token", validateToken);
 app.use("/login", loginRoute);
 app.use("/logout", logoutRoute);

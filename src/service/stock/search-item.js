@@ -1,9 +1,11 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-module.exports = async (search_item) => {
+module.exports = async (search_item, currentPage, itemsPerPage) => {
   try {
     const item = await prisma.stock.findMany({
+      skip: (currentPage - 1) * itemsPerPage,
+      take: itemsPerPage,
       where: {
         OR: [
           { item: { contains: search_item } },
@@ -16,10 +18,8 @@ module.exports = async (search_item) => {
         stocktype: {},
       },
     });
-    if (item.length <= 0) {
-      return { status: 404, message: "No Data Found" };
-    }
-    return { status: 200, item };
+
+    return item;
   } catch (error) {
     console.log(error.message);
     return { status: 500, message: "Something Went Wrong." };

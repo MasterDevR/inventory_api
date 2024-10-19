@@ -22,10 +22,11 @@ module.exports = async (status, search_data) => {
       ],
     };
 
-    // Fetch the transactions
     const result = await prisma.transaction.findMany({
       where: whereCondition,
       select: {
+        ris: true,
+
         id: true,
         created_at: true,
         department_id: true,
@@ -65,7 +66,6 @@ module.exports = async (status, search_data) => {
 
     return result;
   } catch (error) {
-    console.log(error.message);
-    throw new Error("Failed to fetch transactions.");
+    return { status: 500, message: "Something went wrong." };
   }
 };

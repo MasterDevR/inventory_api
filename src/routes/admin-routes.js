@@ -13,7 +13,7 @@ router.post(
   itemsRoutes.createNewStock
 );
 router.get(`/get-stock/:search_item`, itemsRoutes.getStockList);
-router.get(`/get-available-stock/:searchItem`, itemsRoutes.getAvailableStock);
+router.get(`/get-available-stock/:search_item`, itemsRoutes.getAvailableStock);
 router.get("/get-stock-type", itemsRoutes.stockType);
 router.delete("/delete-stock/:stock_no", itemsRoutes.removeStock);
 router.post("/add-stock/:stock_no", upload.none(), itemsRoutes.addStock);
@@ -23,11 +23,13 @@ router.put(
   upload.single("image"),
   itemsRoutes.putEditedStock
 );
-router.get("/get-top-stock", itemsRoutes.getStats);
+router.get("/get-stats", itemsRoutes.getStats);
+router.get("/get-top-stock", itemsRoutes.getTopStock);
 router.get("/get-stock-report/:stock/:year", itemsRoutes.getItemReport);
 router.get("/get-stock-year", itemsRoutes.getStockYear);
 router.get("/stock-details/:stockno", itemsRoutes.getStockDetails);
 router.get("/stock-allocation/:id", itemsRoutes.getStockAllocation);
+router.get("/stock-summary/:year", itemsRoutes.getStockSummary);
 
 // user
 router.get("/get-all-user", usersRoutes.getUsers);

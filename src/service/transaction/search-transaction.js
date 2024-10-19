@@ -18,6 +18,7 @@ module.exports = async (searchData) => {
         ],
       },
       select: {
+        ris: true,
         id: true,
         created_at: true,
         department_id: true,

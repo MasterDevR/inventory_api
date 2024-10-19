@@ -27,7 +27,6 @@ const findUserByDeptId = async ({ username, password }) => {
   }
 };
 
-// check password
 const authenticatePassword = async ({ username, password }) => {
   try {
     // check department table
@@ -45,6 +44,8 @@ const authenticatePassword = async ({ username, password }) => {
         department_id: true,
         name: true,
         password: true,
+        department: true,
+        image: true,
       },
     });
 

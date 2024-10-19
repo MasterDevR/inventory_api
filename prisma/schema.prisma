@@ -42,21 +42,20 @@ model transaction_purpose {
 }
 
 model user {
-  id              String        @id @unique @default(uuid())
-  name            String?
-  image           String?
-  department_id   String        @unique
-  role            String
-  department_code String        @unique
-  department      String        @unique
-  email           String?       @unique
-  password        String
-  created_at      DateTime      @default(now())
-  updated_at      DateTime      @updatedAt
-  transaction     transaction[]
-  Role            role          @relation(fields: [role], references: [id])
-
-  @@index([role], map: "user_role_fkey")
+  id                      String                    @id @unique @default(uuid())
+  name                    String?
+  image                   String?
+  department_id           String                    @unique
+  role                    String
+  department_code         String                    @unique
+  department              String                    @unique
+  email                   String?                   @unique
+  password                String
+  created_at              DateTime                  @default(now())
+  updated_at              DateTime                  @updatedAt
+  transaction             transaction[]
+  Role                    role                      @relation(fields: [role], references: [id])
+  department_notification department_notification[]
 }
 
 model stock {
@@ -82,8 +81,6 @@ model stock {
   stocktype        stock_type         @relation(fields: [stock_type], references: [id])
   stockHistories   stock_history[]
   transaction_item transaction_item[]
-
-  @@index([stock_type], map: "stock_stock_type_fkey")
 }
 
 model stock_history {
@@ -100,8 +97,6 @@ model stock_history {
   purchase_request String?
   stock            stock              @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
   transaction_item transaction_item[]
-
-  @@index([stock_no], map: "stock_history_stock_no_fkey")
 }
 
 model transaction {
@@ -109,6 +104,7 @@ model transaction {
   department_id           String
   status                  String
   transaction_purpose     String
+  ris                     Int?
   created_at              DateTime                  @default(now())
   updated_at              DateTime                  @updatedAt
   admin_notification      admin_notification[]
@@ -117,10 +113,13 @@ model transaction {
   Status                  transaction_status        @relation(fields: [status], references: [id])
   TransactionType         transaction_purpose       @relation(fields: [transaction_purpose], references: [id])
   transaction_item        transaction_item[]
+}
 
-  @@index([department_id], map: "transaction_department_id_fkey")
-  @@index([status], map: "transaction_status_fkey")
-  @@index([transaction_purpose], map: "transaction_transaction_purpose_fkey")
+model requisition_issue_slip_counter {
+  id          Int      @id @default(autoincrement())
+  year        Int      @unique
+  current_ris Int      @default(0)
+  updated_at  DateTime @updatedAt
 }
 
 model transaction_item {
@@ -135,9 +134,6 @@ model transaction_item {
   stock             stock          @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
   Transaction       transaction    @relation(fields: [transaction_id], references: [id])
   History_id        stock_history? @relation(fields: [history_id], references: [id])
-
-  @@index([stock_no], map: "transaction_item_stock_no_fkey")
-  @@index([transaction_id], map: "transaction_item_transaction_id_fkey")
 }
 
 model admin_notification {
@@ -151,20 +147,16 @@ model admin_notification {
   viewed              Boolean             @default(false)
   Transaction         transaction         @relation(fields: [transaction_id], references: [id])
   TransactionType     transaction_purpose @relation(fields: [transaction_purpose], references: [name])
-
-  @@index([transaction_id], map: "admin_notification_transaction_id_fkey")
-  @@index([transaction_purpose], map: "admin_notification_transaction_purpose_fkey")
 }
 
 model department_notification {
   id             String             @id @default(uuid())
   status         String
   transaction_id String
+  department_id  String
   created_at     DateTime           @default(now())
   updated_at     DateTime           @updatedAt
-  Status         transaction_status @relation(fields: [status], references: [name])
+  Status         transaction_status @relation(fields: [status], references: [id])
   Transaction    transaction        @relation(fields: [transaction_id], references: [id])
-
-  @@index([status], map: "department_notification_status_fkey")
-  @@index([transaction_id], map: "department_notification_transaction_id_fkey")
+  Department_id  user               @relation(fields: [department_id], references: [department_id])
 }

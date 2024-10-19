@@ -15,6 +15,7 @@ const getAllUser = async () => {
         department_id: true,
         department_code: true,
         department: true,
+        email: true,
       },
     });
 

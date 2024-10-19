@@ -4,25 +4,71 @@ const encrypPassword = require("../../utils/encryp-password");
 
 const createUser = async (userData) => {
   try {
-    const password = await encrypPassword(userData.password);
+    const {
+      Email,
+      password,
+      department_id,
+      department_code,
+      department,
+      imageSrc,
+    } = userData;
+
+    if (
+      !Email ||
+      !password ||
+      !department_id ||
+      !department_code ||
+      !department ||
+      !imageSrc
+    ) {
+      return { status: 400, message: "Missing required user data fields" };
+    }
+
+    // Check if any user already exists with any of the unique fields
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: Email },
+          { department_id: department_id },
+          { department_code: department_code },
+          { department: department },
+          { image: imageSrc },
+        ],
+      },
+    });
+
+    if (existingUser) {
+      return {
+        status: 409,
+        message: "User with one or more unique fields already exists",
+      };
+    }
+
+    const encryptedPassword = await encrypPassword(password);
+
     const userRole = await prisma.role.findFirst({
       where: {
-        name: userData.role,
+        name: "user",
       },
     });
-    await prisma.user.create({
+
+    if (!userRole) {
+      return { status: 404, message: "User role not found" };
+    }
+
+    const result = await prisma.user.create({
       data: {
-        name: userData.username,
-        email: userData.Email,
-        department_id: userData.department_id,
-        department_code: userData.department_code,
-        department: userData.department,
+        email: Email,
+        department_id: department_id,
+        department_code: department_code,
+        department: department,
         role: userRole.id,
-        image: userData.imageSrc,
-        password: password,
+        image: imageSrc,
+        password: encryptedPassword,
       },
     });
-    return 200;
+
+    return { status: 200, message: "User created successfully" };
   } catch (error) {
     return { status: 500, message: "Internal Server Error." };
   }

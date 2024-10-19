@@ -10,7 +10,8 @@ const createAdminNotification = require("../service/notification/create-admin-no
 const searchTransaction = require("../service/transaction/search-transaction");
 const getTransactionsByStatusAndSearch = require("../service/transaction/get-all-transaction-by-status-and-search_data");
 const transactionReady = require("../service/transaction/ready-transaction");
-const { json } = require("express");
+const getAllTransactionByUser = require("../service/transaction/get-all-transaction-by-user");
+const notification = require("../service/notification/get-user-notification");
 
 const getAllTransaction = async (req, res) => {
   let result;
@@ -37,7 +38,6 @@ const getAllTransaction = async (req, res) => {
       ...item,
       created_at: new Date(item.created_at).toISOString().split("T")[0],
     }));
-
     res.send({ status: 200, data: formattedResult, result: result.data });
   } catch (error) {
     res.send({ status: 500, message: "Something Went Wrong." });
@@ -90,6 +90,7 @@ const approveTransaction = async (req, res) => {
   try {
     const obj = Object.assign({}, req.body);
     const result = await Transaction(obj);
+
     res.send(result);
   } catch (error) {
     res.send({ status: 500, message: "Something went wrong." });
@@ -108,6 +109,7 @@ const readyTransaction = async (req, res) => {
   try {
     const data = Object.assign({}, req.body);
     const result = await transactionReady(data);
+
     res.send(result);
   } catch (error) {
     res.send({ status: 500, message: "Something went wrong." });
@@ -130,6 +132,21 @@ const getAllTransactionStatus = async (req, res) => {
     res.send({ status: 500, message: "Something went wrong." });
   }
 };
+
+const getTransactionHistory = async (req, res) => {
+  const { department_id, id } = req.params;
+  const result = await getAllTransactionByUser(department_id, id);
+  res.send(result);
+};
+const getNotification = async (req, res) => {
+  try {
+    const { department_id } = req.params;
+    const result = await notification(department_id);
+    res.send(result);
+  } catch (error) {
+    res.send({ status: 500, message: "Something Went Wrong" });
+  }
+};
 module.exports = {
   getAllTransaction,
   createTransaction,
@@ -138,4 +155,6 @@ module.exports = {
   rejectTransaction,
   getAllTransactionStatus,
   readyTransaction,
+  getTransactionHistory,
+  getNotification,
 };

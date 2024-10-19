@@ -2,6 +2,7 @@ const getAllAdminNotification = require("../service/notification/get-admin-notif
 const setViewedNotification = require("../service/notification/set-viewed-notification");
 const getAdminNotification = async (req, res) => {
   const result = await getAllAdminNotification();
+
   res.send({ status: 200, result });
 };
 const updateNotification = async (req, res) => {

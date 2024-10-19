@@ -14,6 +14,9 @@ const GetStockReport = require("../stock/get-stock-report");
 const getStockYearList = require("../stock/get-stock-year-list");
 const StockDetails = require("../stock/stock-details");
 const stockAllocation = require("../stock/get-stock-allocation");
+const topStock = require("../stock/get-top-stock");
+const stockSummary = require("../stock//get-stock-summary");
+const StockCount = require("../../service/stock/stock-count");
 const createNewStock = async (req, res) => {
   try {
     const item = req.body;
@@ -22,8 +25,11 @@ const createNewStock = async (req, res) => {
     if (!file || item === undefined) {
       return res.send({ status: 403, message: "Item Data Must Be inputted" });
     }
+
     const isExisting = await verifyStockExistance(item);
     if (isExisting.status === 200 || isExisting.status === 500) {
+      res.send({ status: 403, message: "Item is existing." });
+
       return isExisting;
     }
     const imageURL = await uploadImage(req.file, "file");
@@ -37,28 +43,66 @@ const createNewStock = async (req, res) => {
 
 const getStockList = async (req, res) => {
   try {
+    const count = await StockCount();
     const { search_item } = req.params;
-    let result;
-    if (search_item === "undefined" || search_item > 0) {
-      result = await GetStockList();
+    const { page = 1, limit = 10 } = req.query;
+
+    let item;
+    if (search_item === "undefined") {
+      item = await GetStockList(page, limit);
     } else {
-      result = await searchItem(search_item);
+      item = await searchItem(search_item, page, limit);
     }
-    res.send(result);
+
+    if (item.length === 0) {
+      return res.send({ status: 404, message: "No Data Found" });
+    }
+
+    const totalPages = Math.ceil(count / limit);
+    res.send({
+      status: 200,
+      count,
+      totalPages,
+      page,
+      limit,
+      item,
+    });
   } catch (err) {
-    console.log("Caught Error  /get-item: ", err.message);
     res.send({ status: 500, message: "Internal Server Error" });
   }
 };
+
 const getAvailableStock = async (req, res) => {
   try {
-    const { searchItem } = req.params;
-    const result = await GetStockList(searchItem);
-    res.send(result);
+    const count = await StockCount();
+    const { search_item } = req.params;
+    const { page = 1, limit = 5 } = req.query;
+
+    let item;
+    if (search_item === "undefined") {
+      item = await GetStockList(page, limit);
+    } else {
+      item = await searchItem(search_item, page, limit);
+    }
+
+    if (item.length === 0) {
+      return res.send({ status: 404, message: "No Data Found" });
+    }
+
+    const totalPages = Math.ceil(count / limit);
+    res.send({
+      status: 200,
+      count,
+      totalPages,
+      page,
+      limit,
+      item,
+    });
   } catch (err) {
     res.send({ status: 500, message: "Internal Server Error" });
   }
 };
+
 const stockType = async (req, res) => {
   try {
     const result = await getStockType();
@@ -192,6 +236,21 @@ const getStockAllocation = async (req, res) => {
     console.log(error.message);
   }
 };
+const getTopStock = async (req, res) => {
+  const result = await topStock();
+  res.send(result);
+};
+
+const getStockSummary = async (req, res) => {
+  try {
+    const { year } = req.params;
+    if (year === "undefined" && !year && year !== "") {
+      res.send({ status: 403, message: "Year is missing." });
+    }
+    const result = await stockSummary(year);
+    res.send(result);
+  } catch (error) {}
+};
 module.exports = {
   createNewStock,
   getStockList,
@@ -206,4 +265,6 @@ module.exports = {
   getStockDetails,
   getAvailableStock,
   getStockAllocation,
+  getTopStock,
+  getStockSummary,
 };

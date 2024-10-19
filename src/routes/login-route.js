@@ -7,7 +7,6 @@ router.post("/", async (req, res) => {
   try {
     const { credentials } = req.body;
     const response = await authenticate(credentials);
-
     if (response.status === 404 || response.status === 401) {
       res.send(response);
       return;
@@ -25,7 +24,7 @@ router.post("/", async (req, res) => {
         userData: {
           ...filteredUserData,
           _id: filteredUserData.id,
-          image: filteredUserData.image,
+          department: filteredUserData.department,
           accessToken: Token,
         },
       },
