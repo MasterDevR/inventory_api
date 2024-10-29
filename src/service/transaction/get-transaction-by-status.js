@@ -4,6 +4,9 @@ const prisma = new PrismaClient();
 module.exports = async (status) => {
   try {
     const result = await prisma.transaction.findMany({
+      orderBy: {
+        created_at: "desc",
+      },
       where: {
         Status: { name: status },
       },

@@ -243,13 +243,16 @@ const getTopStock = async (req, res) => {
 
 const getStockSummary = async (req, res) => {
   try {
-    const { year } = req.params;
+    const { year, month } = req.params;
     if (year === "undefined" && !year && year !== "") {
       res.send({ status: 403, message: "Year is missing." });
     }
-    const result = await stockSummary(year);
+    const result = await stockSummary(year, month);
     res.send(result);
-  } catch (error) {}
+  } catch (error) {
+    console.log(error.message);
+    res.send({ status: 500, message: "Internal Server Error" });
+  }
 };
 module.exports = {
   createNewStock,

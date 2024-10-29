@@ -26,4 +26,12 @@ router.put(
   upload.none(),
   userRoutes.changePassword
 );
+router.post("/verify-email/", userRoutes.verifyEmailController);
+router.post("/verify-otp", userRoutes.verifyOTPController);
+router.put(
+  "/change-email/:department_id",
+  upload.none(),
+  userRoutes.changeEmailController
+);
+// router.post("/send-otp", userRoutes.sendOTPController);
 module.exports = router;

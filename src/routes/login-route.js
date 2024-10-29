@@ -11,7 +11,6 @@ router.post("/", async (req, res) => {
       res.send(response);
       return;
     }
-
     const Token = await generateToken(response.findUser);
 
     const filteredUserData = Object.fromEntries(

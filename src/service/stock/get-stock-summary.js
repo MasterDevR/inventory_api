@@ -3,7 +3,6 @@ const prisma = new PrismaClient();
 
 module.exports = async (year, month = 12) => {
   try {
-    // Calculate the start and end date for the specified month
     const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`);
     const endOfMonth = new Date(
       `${year}-${String(month).padStart(2, "0")}-${new Date(
@@ -13,12 +12,16 @@ module.exports = async (year, month = 12) => {
       ).getDate()}T23:59:59.999Z`
     );
 
-    // Retrieve stock history up to the selected month
     const stockHistory = await prisma.stock_history.findMany({
+      orderBy: {
+        stock: {
+          item: "asc",
+        },
+      },
       where: {
         created_at: {
-          gte: startOfYear, // Start from the beginning of the year
-          lte: endOfMonth, // Up to the end of the selected month
+          gte: startOfYear,
+          lte: endOfMonth,
         },
       },
       include: {
@@ -31,27 +34,29 @@ module.exports = async (year, month = 12) => {
       },
     });
 
-    // Check if stock history is empty
     if (stockHistory.length === 0) {
       return { status: 404, message: "No data found." };
     }
 
-    // Retrieve transaction items within the same date range
     const transactionItems = await prisma.transaction_item.findMany({
+      orderBy: {
+        stock: {
+          description: "asc",
+        },
+      },
       where: {
         created_at: {
-          gte: startOfYear, // Start from the beginning of the year
-          lte: endOfMonth, // Up to the end of the selected month
+          gte: startOfYear,
+          lte: endOfMonth,
         },
       },
     });
 
-    // Calculate total quantities issued from transaction items
     const totalIssuedByStockNo = transactionItems.reduce((acc, item) => {
       if (!acc[item.stock_no]) {
-        acc[item.stock_no] = [];
+        acc[item.stock_no] = 0;
       }
-      acc[item.stock_no].push(item.approved_quantity);
+      acc[item.stock_no] += item.approved_quantity;
       return acc;
     }, {});
 
@@ -75,7 +80,7 @@ module.exports = async (year, month = 12) => {
         acc[stockNo] = {
           stock_no: stockNo,
           description: item.stock.description,
-          qty: availableQty[stockNo] || 0,
+          qty: 0, // We'll calculate this later
           stock_on_hand: [],
           price: [],
           quantity_issued: [],
@@ -84,7 +89,7 @@ module.exports = async (year, month = 12) => {
         };
       }
 
-      const issuedQty = item.quantity_issued || "";
+      const issuedQty = totalIssuedByStockNo[stockNo] || 0;
 
       const poIndex =
         acc[stockNo].purchase_order_numbers.indexOf(purchaseOrder);
@@ -93,7 +98,7 @@ module.exports = async (year, month = 12) => {
         acc[stockNo].purchase_order_numbers.push(purchaseOrder);
         acc[stockNo].quantity_issued.push(issuedQty);
       } else {
-        acc[stockNo].quantity_issued[poIndex] += issuedQty;
+        acc[stockNo].quantity_issued[poIndex] = issuedQty;
       }
 
       acc[stockNo].stock_on_hand.push(item.quantity_on_hand);
@@ -104,6 +109,19 @@ module.exports = async (year, month = 12) => {
 
       return acc;
     }, {});
+
+    // Calculate qty after the reduce operation
+    Object.values(stockGroupedByPO).forEach((stock) => {
+      const totalInitialQty = stock.initial_qty.reduce(
+        (sum, qty) => sum + qty,
+        0
+      );
+      const totalIssuedQty = stock.quantity_issued.reduce(
+        (sum, qty) => sum + qty,
+        0
+      );
+      stock.qty = Math.max(totalInitialQty - totalIssuedQty, 0);
+    });
 
     // Prepare final output
     const groupedData = Object.values(stockGroupedByPO).map((stock) => {
@@ -120,10 +138,26 @@ module.exports = async (year, month = 12) => {
     });
 
     // Prepare response
-    const purchaseNo = [
-      ...new Set(stockHistory.map((item) => item.purchase_order)),
-    ];
+    const purchaseNoWithDates = stockHistory
+      .reduce((acc, item) => {
+        if (!acc.some((po) => po.purchase_order === item.purchase_order)) {
+          acc.push({
+            purchase_order: item.purchase_order,
+            created_at: item.created_at,
+          });
+        }
+        return acc;
+      }, [])
+      .sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        return (
+          dateA.getMonth() - dateB.getMonth() ||
+          dateA.getDate() - dateB.getDate()
+        );
+      });
 
+    const purchaseNo = purchaseNoWithDates.map((item) => item.purchase_order);
     return { status: 200, purchaseNo, groupedData };
   } catch (error) {
     console.error("Error fetching stock summary:", error);

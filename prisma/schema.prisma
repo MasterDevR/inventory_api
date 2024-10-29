@@ -11,152 +11,131 @@ model role {
   id         String   @id @unique @default(uuid())
   name       String   @unique
   created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  user       user[]
+  updated_at DateTime @default(now()) @updatedAt
 }
 
 model stock_type {
-  id         String   @id @unique @default(uuid())
+  id         String   @id @default(uuid())
   name       String   @unique
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  stock      stock[]
 }
 
 model transaction_status {
-  id                      String                    @id @unique @default(uuid())
-  name                    String                    @unique
-  created_at              DateTime                  @default(now())
-  updated_at              DateTime                  @updatedAt
-  department_notification department_notification[]
-  transactions            transaction[]
+  id         String   @id @default(uuid())
+  name       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model transaction_purpose {
-  id                 String               @id @unique @default(uuid())
-  name               String               @unique
-  created_at         DateTime             @default(now())
-  updated_at         DateTime             @updatedAt
-  admin_notification admin_notification[]
-  transactions       transaction[]
+  id         String   @id @default(uuid())
+  name       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model user {
-  id                      String                    @id @unique @default(uuid())
-  name                    String?
-  image                   String?
-  department_id           String                    @unique
-  role                    String
-  department_code         String                    @unique
-  department              String                    @unique
-  email                   String?                   @unique
-  password                String
-  created_at              DateTime                  @default(now())
-  updated_at              DateTime                  @updatedAt
-  transaction             transaction[]
-  Role                    role                      @relation(fields: [role], references: [id])
-  department_notification department_notification[]
+  id              String   @id @default(uuid())
+  name            String?
+  image           String?
+  department_id   String
+  role            String
+  department_code String
+  department      String
+  email           String?  @unique
+  password        String
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 }
 
 model stock {
-  id               String             @id @unique @default(uuid())
+  id               String   @id @default(uuid())
   item             String
   price            Float
   description      String
   measurement      String
-  stock_no         String             @unique
-  re_order_point   String             @unique
+  stock_no         String   @unique
+  re_order_point   String
   image            String
   reference        String
   consume_date     Int
   distributor      String
-  stock_counter    Int                @default(0)
+  stock_counter    Int      @default(0)
   stock_type       String
-  created_at       DateTime           @default(now())
-  updated_at       DateTime           @updatedAt
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
   purchase_order   String
-  quantity_issued  Int                @default(0)
+  quantity_issued  Int      @default(0)
   quantity_on_hand Int?
   purchase_request String?
-  stocktype        stock_type         @relation(fields: [stock_type], references: [id])
-  stockHistories   stock_history[]
-  transaction_item transaction_item[]
 }
 
 model stock_history {
-  id               String             @id @unique @default(uuid())
+  id               String   @id @default(uuid())
   stock_no         String
   price            Float
   distributor      String
-  created_at       DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  total_request    Int                @default(0)
+  created_at       DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  total_request    Int      @default(0)
   purchase_order   String
-  quantity_issued  Int                @default(0)
+  quantity_issued  Int      @default(0)
   quantity_on_hand Int?
   purchase_request String?
-  stock            stock              @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
-  transaction_item transaction_item[]
 }
 
 model transaction {
-  id                      String                    @id @default(uuid())
-  department_id           String
-  status                  String
-  transaction_purpose     String
-  ris                     Int?
-  created_at              DateTime                  @default(now())
-  updated_at              DateTime                  @updatedAt
-  admin_notification      admin_notification[]
-  department_notification department_notification[]
-  user                    user                      @relation(fields: [department_id], references: [department_id], onDelete: Cascade)
-  Status                  transaction_status        @relation(fields: [status], references: [id])
-  TransactionType         transaction_purpose       @relation(fields: [transaction_purpose], references: [id])
-  transaction_item        transaction_item[]
+  id                  String   @id @default(uuid())
+  department_id       String
+  status              String
+  transaction_purpose String
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  ris                 Int?
 }
 
 model requisition_issue_slip_counter {
-  id          Int      @id @default(autoincrement())
+  id          Int      @id
   year        Int      @unique
   current_ris Int      @default(0)
   updated_at  DateTime @updatedAt
 }
 
 model transaction_item {
-  id                String         @id @default(uuid())
-  history_id        String?
+  id                String   @id @default(uuid())
   transaction_id    String
   stock_no          String
   quantity          Int
-  approved_quantity Int            @default(0)
-  created_at        DateTime       @default(now())
-  updated_at        DateTime       @updatedAt
-  stock             stock          @relation(fields: [stock_no], references: [stock_no], onDelete: Cascade)
-  Transaction       transaction    @relation(fields: [transaction_id], references: [id])
-  History_id        stock_history? @relation(fields: [history_id], references: [id])
+  approved_quantity Int      @default(0)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  history_id        String?
 }
 
 model admin_notification {
-  id                  String              @id @default(uuid())
+  id                  String   @id @default(uuid())
   transaction_id      String
   department          String
   transaction_purpose String
   no_item             Int
-  created_at          DateTime            @default(now())
-  updated_at          DateTime            @updatedAt
-  viewed              Boolean             @default(false)
-  Transaction         transaction         @relation(fields: [transaction_id], references: [id])
-  TransactionType     transaction_purpose @relation(fields: [transaction_purpose], references: [name])
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  viewed              Boolean  @default(false)
+
+  @@index([transaction_id], map: "admin_notification_transaction_id_fkey")
+  @@index([transaction_purpose], map: "admin_notification_transaction_purpose_fkey")
 }
 
 model department_notification {
-  id             String             @id @default(uuid())
+  id             String   @id @default(uuid())
   status         String
   transaction_id String
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
   department_id  String
-  created_at     DateTime           @default(now())
-  updated_at     DateTime           @updatedAt
-  Status         transaction_status @relation(fields: [status], references: [id])
-  Transaction    transaction        @relation(fields: [transaction_id], references: [id])
-  Department_id  user               @relation(fields: [department_id], references: [department_id])
+
+  @@index([department_id], map: "department_notification_department_id_fkey")
+  @@index([status], map: "department_notification_status_fkey")
+  @@index([transaction_id], map: "department_notification_transaction_id_fkey")
 }

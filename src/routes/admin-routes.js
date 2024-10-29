@@ -29,7 +29,7 @@ router.get("/get-stock-report/:stock/:year", itemsRoutes.getItemReport);
 router.get("/get-stock-year", itemsRoutes.getStockYear);
 router.get("/stock-details/:stockno", itemsRoutes.getStockDetails);
 router.get("/stock-allocation/:id", itemsRoutes.getStockAllocation);
-router.get("/stock-summary/:year", itemsRoutes.getStockSummary);
+router.get("/stock-summary/:year/:month", itemsRoutes.getStockSummary);
 
 // user
 router.get("/get-all-user", usersRoutes.getUsers);

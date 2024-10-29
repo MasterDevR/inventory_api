@@ -23,6 +23,9 @@ module.exports = async (status, search_data) => {
     };
 
     const result = await prisma.transaction.findMany({
+      orderBy: {
+        created_at: "desc",
+      },
       where: whereCondition,
       select: {
         ris: true,

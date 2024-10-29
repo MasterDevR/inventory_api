@@ -21,7 +21,6 @@ const findStockByStockNo = async (stock_no, data) => {
         quantity_on_hand: stock.quantity_on_hand + +data.quantity,
         distributor: data.distributor,
         purchase_order: data.purchase_order,
-        purchase_request: data.purchase_request,
       },
     });
 
@@ -33,7 +32,6 @@ const findStockByStockNo = async (stock_no, data) => {
         quantity_on_hand: +data.quantity,
         distributor: data.distributor,
         purchase_order: data.purchase_order,
-        purchase_request: data.purchase_request,
       },
     });
 

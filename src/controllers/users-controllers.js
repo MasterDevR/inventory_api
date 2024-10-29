@@ -5,6 +5,10 @@ const createUser = require("../service/user/create-user");
 const findUser = require("../service/user/find-user");
 const userIcon = require("../service/user/get-user-icon");
 const updatePassword = require("../service/user/update-password");
+const verifyOTP = require("../service/email/verify-otp");
+const verifyEmail = require("../service/email/verify-email");
+const sendOTP = require("../service/email/send-otp");
+const changeEmail = require("../service/user/change-email");
 const getUsers = async (req, res) => {
   try {
     const users = await getAllUser();
@@ -102,10 +106,49 @@ const changePassword = async (req, res) => {
   }
 };
 // Cb@12345
+const verifyEmailController = async (req, res) => {
+  const { email } = req.body;
+  const result = await verifyEmail(email);
+  if (result.status === 200) {
+    const sendOTPResult = await sendOTP(email);
+    res.send(sendOTPResult);
+  } else {
+    res.send(result);
+  }
+};
+const verifyOTPController = async (req, res) => {
+  try {
+    const { verifyEmail, otp } = req.body;
+    const result = await verifyOTP(verifyEmail, otp);
+    res.send(result);
+  } catch (error) {
+    console.log(error.message);
+    res.sendStatus(500);
+  }
+};
+const changeEmailController = async (req, res) => {
+  const { department_id } = req.params;
+  const { current_password, confirm_current_password, new_email } = req.body;
+  console.log(
+    department_id,
+    current_password,
+    confirm_current_password,
+    new_email
+  );
+  if (current_password !== confirm_current_password) {
+    return res.send({ status: 403, message: "Password does not match" });
+  }
+  const result = await changeEmail(department_id, current_password, new_email);
+  res.send(result);
+};
+
 module.exports = {
   getUsers,
   getRoles,
   createNewUser,
   getUserIcon,
   changePassword,
+  verifyEmailController,
+  verifyOTPController,
+  changeEmailController,
 };
