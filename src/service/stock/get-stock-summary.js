@@ -159,7 +159,7 @@ module.exports = async (year, month = 12) => {
 
     const purchaseNo = purchaseNoWithDates.map((item) => item.purchase_order);
     return { status: 200, purchaseNo, groupedData };
-  } catch (error) {
+  } 
    catch (error) {
     console.error("Error fetching stock summary:", {
       name: error.name,
