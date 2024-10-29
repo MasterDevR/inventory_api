@@ -5,9 +5,10 @@ const secretToken = process.env.SECRET_TOKEN;
 
 const generateToken = async (data) => {
   try {
-    const { id, role } = data;
+    const { id, Role } = data;
+    const { name } = Role;
 
-    const token = jwt.sign({ id, role }, secretToken, { expiresIn: "1d" });
+    const token = jwt.sign({ id, name }, secretToken, { expiresIn: "1d" });
 
     return token;
   } catch (error) {

@@ -8,17 +8,19 @@ const adminMiddleware = async (req, res, next) => {
   try {
     // const token = req.headers.authorization.split(" ")[1];
     // if (token === undefined) {
-    //   res.send({ status: 404, message: "Unauthorized Access" });
+    //   return res.send({ status: 404, message: "Unauthorized Access" });
     // }
 
     // let decoded = jwt.verify(token, secretToken);
-
-    // if (decoded.role !== "RECEIVER" || decoded.role !== "APPROVER") {
-    //   res.send({ status: 401, message: "Unauthorized Access" });
-    // } else {
-    //   req.user = decoded;
-    //   next();
+    // if (
+    //   decoded.name !== "admin" &&
+    //   decoded.name !== "staff" &&
+    //   decoded.name !== "user"
+    // ) {
+    //   return res.send({ status: 401, message: "Unauthorized Access" });
     // }
+
+    // req.user = decoded;
     next();
   } catch (err) {
     res

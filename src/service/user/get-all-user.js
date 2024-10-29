@@ -6,7 +6,7 @@ const getAllUser = async () => {
     const users = await prisma.user.findMany({
       where: {
         Role: {
-          name: "department",
+          name: "user",
         },
       },
       select: {
@@ -15,6 +15,7 @@ const getAllUser = async () => {
         department_id: true,
         department_code: true,
         department: true,
+        email: true,
       },
     });
 
@@ -23,7 +24,6 @@ const getAllUser = async () => {
     }
     return { status: 200, users };
   } catch (error) {
-    console.log(error.message);
     return { status: 500, message: "Internal Server Error." };
   }
 };
