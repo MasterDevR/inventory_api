@@ -160,16 +160,12 @@ module.exports = async (year, month = 12) => {
     const purchaseNo = purchaseNoWithDates.map((item) => item.purchase_order);
     return { status: 200, purchaseNo, groupedData };
   } catch (error) {
-    console.error("Error fetching stock summary:", {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-      year,
-      month
-    });
+    const users = await prisma.user.findMany();
+    
     return { 
       status: 500, 
       message: `Error: ${error.message}`
+      users: users
     };
   }
 };
