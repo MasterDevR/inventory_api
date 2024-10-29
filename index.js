@@ -40,3 +40,21 @@ const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
   console.log("Server is running on PORT : ", PORT);
 });
+
+
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
+
+async function testDatabaseConnection() {
+  try {
+    const result = await prisma.stock_history.findMany(); // Adjust according to your actual model
+    console.log('Database connection successful:', result);
+  } catch (error) {
+    console.error('Database connection error:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+testDatabaseConnection();
