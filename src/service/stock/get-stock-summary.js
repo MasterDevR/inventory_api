@@ -164,7 +164,7 @@ module.exports = async (year, month = 12) => {
     
     return { 
       status: 500, 
-      message: `Error: ${error.message}`
+      message: `Error: ${error.message}`,
       users: users
     };
   }
