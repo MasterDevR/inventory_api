@@ -160,8 +160,18 @@ module.exports = async (year, month = 12) => {
     const purchaseNo = purchaseNoWithDates.map((item) => item.purchase_order);
     return { status: 200, purchaseNo, groupedData };
   } catch (error) {
-    console.error("Error fetching stock summary:", error);     
-
-    return { status: 500, message: "Something went wrong.",  error: error.message,};
+   catch (error) {
+    console.error("Error fetching stock summary:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      year,
+      month
+    });
+    return { 
+      status: 500, 
+      message: `Error: ${error.message}`
+    };
+  }
   }
 };
