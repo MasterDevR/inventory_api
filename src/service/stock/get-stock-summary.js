@@ -13,11 +13,7 @@ module.exports = async (year, month = 12) => {
     );
 
     const stockHistory = await prisma.stock_history.findMany({
-      orderBy: {
-        stock: {
-          item: "asc",
-        },
-      },
+  
       where: {
         created_at: {
           gte: startOfYear,
