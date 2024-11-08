@@ -11,15 +11,16 @@ const createUser = async (userData) => {
       department_code,
       department,
       imageSrc,
+      requestor_type,
     } = userData;
 
     if (
-      !Email ||
       !password ||
       !department_id ||
       !department_code ||
       !department ||
-      !imageSrc
+      !imageSrc ||
+      !requestor_type
     ) {
       return { status: 400, message: "Missing required user data fields" };
     }
@@ -58,12 +59,13 @@ const createUser = async (userData) => {
 
     const result = await prisma.user.create({
       data: {
-        email: Email,
+        email: Email || "",
         department_id: department_id,
         department_code: department_code,
         department: department,
         role: userRole.id,
         image: imageSrc,
+        requestor_type_id: requestor_type,
         password: encryptedPassword,
       },
     });

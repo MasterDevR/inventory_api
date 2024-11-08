@@ -16,6 +16,11 @@ const getAllUser = async () => {
         department_code: true,
         department: true,
         email: true,
+        Requestor_type: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
 

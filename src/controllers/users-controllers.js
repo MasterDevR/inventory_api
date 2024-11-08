@@ -9,6 +9,7 @@ const verifyOTP = require("../service/email/verify-otp");
 const verifyEmail = require("../service/email/verify-email");
 const sendOTP = require("../service/email/send-otp");
 const changeEmail = require("../service/user/change-email");
+const getRequestorType = require("../service/user/requestor-type");
 const getUsers = async (req, res) => {
   try {
     const users = await getAllUser();
@@ -43,7 +44,6 @@ const createNewUser = async (req, res) => {
         .status(400)
         .send({ status: 400, message: "User data is missing" });
     }
-
     const isExisting = await findUser(userData);
     if (isExisting.status === 404) {
       const result = await createUser({ ...userData, imageSrc });
@@ -142,6 +142,11 @@ const changeEmailController = async (req, res) => {
   res.send(result);
 };
 
+const RequestorType = async (req, res) => {
+  const result = await getRequestorType();
+  res.send(result);
+};
+
 module.exports = {
   getUsers,
   getRoles,
@@ -151,4 +156,5 @@ module.exports = {
   verifyEmailController,
   verifyOTPController,
   changeEmailController,
+  RequestorType,
 };

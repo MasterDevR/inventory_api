@@ -43,6 +43,11 @@ const authenticatePassword = async ({ username, password }) => {
         department: true,
         image: true,
         role: true,
+        Requestor_type: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
     const userRole = await prisma.role.findFirst({

@@ -42,21 +42,31 @@ model transaction_purpose {
 }
 
 model user {
-  id              String        @id @unique @default(uuid())
-  name            String?
-  image           String?
-  department_id   String        @unique
-  role            String
-  department_code String        @unique
-  department      String        @unique
-  email           String?       @unique
-  password        String
-  created_at      DateTime      @default(now())
-  updated_at      DateTime      @updatedAt
-  transaction     transaction[]
-  Role            role          @relation(fields: [role], references: [id])
+  id                String          @id @unique @default(uuid())
+  name              String?
+  image             String?
+  department_id     String          @unique
+  role              String
+  department_code   String          @unique
+  department        String          @unique
+  email             String?         @unique
+  password          String
+  requestor_type_id String?
+  Requestor_type    requestor_type? @relation(fields: [requestor_type_id], references: [id])
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @updatedAt
+  transaction       transaction[]
+  Role              role            @relation(fields: [role], references: [id])
 
   @@index([role], map: "user_role_fkey")
+}
+
+model requestor_type {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user       user[]
 }
 
 model stock {
@@ -104,8 +114,16 @@ model stock_history {
   @@index([stock_no], map: "stock_history_stock_no_fkey")
 }
 
+model requisition_issue_slip_counter {
+  id          String   @id @default(uuid())
+  year        Int      @unique
+  current_ris Int      @default(0)
+  updated_at  DateTime @updatedAt
+}
+
 model transaction {
   id                  String               @id @default(uuid())
+  ris                 Int?
   department_id       String
   status              String
   transaction_purpose String
