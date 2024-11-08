@@ -12,6 +12,7 @@ module.exports = async () => {
         description: true,
         image: true,
         stock_no: true,
+        quantity_on_hand: true,
       },
     });
 

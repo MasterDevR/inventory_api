@@ -12,7 +12,11 @@ const getTransactionsByStatusAndSearch = require("../service/transaction/get-all
 const transactionReady = require("../service/transaction/ready-transaction");
 const getAllTransactionByUser = require("../service/transaction/get-all-transaction-by-user");
 const notification = require("../service/notification/get-user-notification");
-
+const {
+  getEditTransaction,
+  putEditTransaction,
+  deleteTransaction,
+} = require("../service/transaction/edit-transactiob");
 const getAllTransaction = async (req, res) => {
   let result;
   try {
@@ -147,6 +151,23 @@ const getNotification = async (req, res) => {
     res.send({ status: 500, message: "Something Went Wrong" });
   }
 };
+const GetEditTransaction = async (req, res) => {
+  const { id } = req.params;
+  const result = await getEditTransaction(id);
+  res.send(result);
+};
+const PutEditTransaction = async (req, res) => {
+  const { id } = req.params;
+  const { items } = req.body;
+  const result = await putEditTransaction(items, id);
+  res.send(result);
+};
+const DeleteTransaction = async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  const result = await deleteTransaction(id);
+  res.send(result);
+};
 module.exports = {
   getAllTransaction,
   createTransaction,
@@ -157,4 +178,7 @@ module.exports = {
   readyTransaction,
   getTransactionHistory,
   getNotification,
+  GetEditTransaction,
+  PutEditTransaction,
+  DeleteTransaction,
 };

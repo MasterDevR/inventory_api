@@ -16,6 +16,11 @@ const getAllUser = async () => {
         department_code: true,
         department: true,
         email: true,
+        Requestor_type: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
 
@@ -24,6 +29,7 @@ const getAllUser = async () => {
     }
     return { status: 200, users };
   } catch (error) {
+    console.log(error.message);
     return { status: 500, message: "Internal Server Error." };
   }
 };

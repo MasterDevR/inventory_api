@@ -11,10 +11,10 @@ router.post("/", async (req, res) => {
       res.send(response);
       return;
     }
-    const Token = await generateToken(response.findUser);
+    const Token = await generateToken(response.data);
 
     const filteredUserData = Object.fromEntries(
-      Object.entries(response.findUser).filter(([key]) => key !== "password")
+      Object.entries(response.data).filter(([key]) => key !== "password")
     );
 
     res.send({

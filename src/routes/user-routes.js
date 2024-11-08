@@ -33,5 +33,7 @@ router.put(
   upload.none(),
   userRoutes.changeEmailController
 );
-// router.post("/send-otp", userRoutes.sendOTPController);
+router.get("/edit-transaction/:id", transaction.GetEditTransaction);
+router.put("/modify-transactions/:id", transaction.PutEditTransaction);
+router.delete("/delete-transactions/:id", transaction.DeleteTransaction);
 module.exports = router;

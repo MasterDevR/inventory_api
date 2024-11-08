@@ -35,7 +35,7 @@ router.get("/stock-summary/:year/:month", itemsRoutes.getStockSummary);
 router.get("/get-all-user", usersRoutes.getUsers);
 router.get(`/get-user-role`, usersRoutes.getRoles);
 router.post("/create-user", upload.single("image"), usersRoutes.createNewUser);
-
+router.get("/get-requestor-type", usersRoutes.RequestorType);
 // transaction
 router.get(
   "/get-all-transaction/:status/:search_data",

@@ -21,16 +21,14 @@ module.exports = async (data) => {
     }
 
     // Check stock levels before approving
-    const stockInfo = []; // To store stock info for each item
+    const stockInfo = [];
     const insufficientItems = [];
 
     const stockCheckPromises = items.map(async (item) => {
       const history = await prisma.stock_history.findMany({
         where: {
           stock_no: item.stock_no,
-          quantity_on_hand: {
-            gt: 0,
-          },
+          quantity_on_hand: { gt: 0 },
         },
         select: {
           id: true,
@@ -44,48 +42,39 @@ module.exports = async (data) => {
             },
           },
         },
-        orderBy: {
-          created_at: "asc",
-        },
+        orderBy: { created_at: "asc" },
       });
 
-      let sufficientStock = false;
-      let availableQuantity = 0;
+      let availableQuantity = history.reduce(
+        (sum, stock) => sum + stock.quantity_on_hand,
+        0
+      );
+      let sufficientStock = availableQuantity >= item.approved_quantity;
 
-      // Calculate available stock
-      for (const stock of history) {
-        availableQuantity += stock.quantity_on_hand; // Accumulate available stock
-        if (stock.quantity_on_hand >= item.approved_quantity) {
-          sufficientStock = true; // Stock is sufficient
-          break;
-        }
-      }
-
-      // Store stock information for display
       stockInfo.push({
         stock_no: item.stock_no,
         availableQuantity,
-        approved_quantity: item.approved_quantity,
+        requestedQuantity: item.approved_quantity,
         sufficient: sufficientStock,
       });
 
       if (!sufficientStock) {
-        insufficientItems.push(item.stock_no); // Add to insufficient items
+        insufficientItems.push(item.stock_no);
       }
     });
 
     await Promise.all(stockCheckPromises);
 
     if (insufficientItems.length > 0) {
-      const message = `Insufficient stock for: ${insufficientItems.join(
-        ", "
-      )}\nAvailable stock: `;
       const availableStockDetails = stockInfo
-        .map((stock) => `${stock.stock_no}: ${stock.availableQuantity}`)
-        .join(", ");
+        .map(
+          (stock) =>
+            `${stock.stock_no}:${stock.availableQuantity}:${stock.requestedQuantity}`
+        )
+        .join(",");
       return {
-        status: 400,
-        message: message + availableStockDetails,
+        status: 407,
+        message: availableStockDetails,
       };
     }
 
@@ -98,7 +87,6 @@ module.exports = async (data) => {
     });
 
     const ris = counter.current_ris;
-
     const status = await prisma.transaction_status.findFirst({
       where: {
         name: "approved",
@@ -107,7 +95,8 @@ module.exports = async (data) => {
         id: true,
       },
     });
-
+    // generete ramdom ris id + current date
+    const risId = `${ris}-${new Date().toISOString().split("T")[0]}`;
     await prisma.transaction.update({
       where: {
         id: data.transaction_id,
