@@ -14,6 +14,8 @@ const deleteItem = async (stock_no) => {
   } catch (error) {
     console.log(error);
     return { status: 500, message: "Internal Server Error." };
+  } finally {
+    await prisma.$disconnect();
   }
 };
 

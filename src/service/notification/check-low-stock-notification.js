@@ -31,6 +31,8 @@ async function checkLowStock(limit) {
   } catch (err) {
     console.error("Error checking low stock:", err.message);
     return [];
+  } finally {
+    await prisma.$disconnect();
   }
 }
 

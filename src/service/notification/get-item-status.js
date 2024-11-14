@@ -11,5 +11,7 @@ module.exports = async () => {
   } catch (error) {
     console.log(error.message);
     throw new Error("Failed to fetch transactions.");
+  } finally {
+    await prisma.$disconnect();
   }
 };

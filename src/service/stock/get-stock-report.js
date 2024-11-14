@@ -31,6 +31,8 @@ const getStockReport = async (item, year) => {
     return { status: 200, result };
   } catch (error) {
     return { status: 500, message: "Something Went Wrong." };
+  } finally {
+    await prisma.$disconnect();
   }
 };
 

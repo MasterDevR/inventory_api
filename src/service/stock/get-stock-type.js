@@ -14,6 +14,8 @@ const getStockType = async () => {
     console.log(err.messsage);
     console.log("Caught Error getStockType : ", error.message);
     return { status: 500, message: "Internal Server Error." };
+  } finally {
+    await prisma.$disconnect();
   }
 };
 

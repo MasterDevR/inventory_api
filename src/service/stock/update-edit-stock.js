@@ -99,6 +99,8 @@ const updateEditedStock = async (stock_no, data, file) => {
   } catch (error) {
     console.log(error.message);
     return { status: 500, message: error.message };
+  } finally {
+    await prisma.$disconnect();
   }
 };
 

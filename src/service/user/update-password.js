@@ -32,5 +32,7 @@ module.exports = async (department_id, old_password, new_password) => {
     return { status: 200, message: "Password updated successfully." };
   } catch (err) {
     return { status: 500, message: "Something went wrong." };
+  } finally {
+    await prisma.$disconnect();
   }
 };

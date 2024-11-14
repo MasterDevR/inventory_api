@@ -49,8 +49,9 @@ module.exports = async (data, purpose, departmentId) => {
       id: transaction.id,
     };
   } catch (error) {
-    console.log(error.message);
-
+    console.log(error);
     return { status: 500, message: "Something went wrong." };
+  } finally {
+    await prisma.$disconnect();
   }
 };

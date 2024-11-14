@@ -30,7 +30,6 @@ const findUserByDeptId = async ({ username, password }) => {
 const authenticatePassword = async ({ username, password }) => {
   try {
     // check department table
-    console.log("sad");
     const findUser = await prisma.user.findFirst({
       where: {
         department_id: username,
@@ -71,7 +70,7 @@ const authenticatePassword = async ({ username, password }) => {
       message: "Internal Server Error. Please Contact Admin",
     };
   } finally {
-    prisma.$disconnect();
+    await prisma.$disconnect();
   }
 };
 module.exports = findUserByDeptId;

@@ -27,6 +27,8 @@ const checkMatches = async (itemData) => {
   } catch (error) {
     console.log(error.message);
     return { status: 500, message: "Internal Server Error." };
+  } finally {
+    await prisma.$disconnect();
   }
 };
 

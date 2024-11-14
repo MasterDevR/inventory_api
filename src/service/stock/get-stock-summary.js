@@ -13,7 +13,11 @@ module.exports = async (year, month = 12) => {
     );
 
     const stockHistory = await prisma.stock_history.findMany({
-  
+      orderBy: {
+        stock: {
+          item: "asc",
+        },
+      },
       where: {
         created_at: {
           gte: startOfYear,
@@ -29,7 +33,6 @@ module.exports = async (year, month = 12) => {
         },
       },
     });
-
     if (stockHistory.length === 0) {
       return { status: 404, message: "No data found." };
     }
@@ -156,7 +159,13 @@ module.exports = async (year, month = 12) => {
     const purchaseNo = purchaseNoWithDates.map((item) => item.purchase_order);
     return { status: 200, purchaseNo, groupedData };
   } catch (error) {
-    console.error("Error fetching stock summary:", error);
-    return { status: 500, message: "Something went wrong." };
+    const users = await prisma.user.findMany();
+
+    return {
+      status: 500,
+      message: `Something went wrong.`,
+    };
+  } finally {
+    await prisma.$disconnect();
   }
 };

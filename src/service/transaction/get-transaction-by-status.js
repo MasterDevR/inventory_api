@@ -43,6 +43,7 @@ module.exports = async (status) => {
               select: {
                 item: true,
                 price: true,
+                distributor: true,
               },
             },
           },
@@ -53,5 +54,7 @@ module.exports = async (status) => {
     return result;
   } catch (error) {
     console.log(error.message);
+  } finally {
+    await prisma.$disconnect();
   }
 };

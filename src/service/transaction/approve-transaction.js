@@ -4,81 +4,17 @@ const generateEmail = require("../notification/generate-email-notification");
 
 module.exports = async (data) => {
   try {
-    const currentYear = new Date().getFullYear();
-
-    // Prepare items from data
-    const items = [];
-    let i = 0;
-    while (data[`item_id_${i}`]) {
-      items.push({
-        stock_no: data[`stock_no_${i}`],
-        transaction_id: data["transaction_id"],
-        item_id: data[`item_id_${i}`],
-        quantity: parseInt(data[`quantity_${i}`], 10),
-        approved_quantity: parseInt(data[`approved_quantity_${i}`], 10),
-      });
-      i++;
-    }
-
-    // Check stock levels before approving
-    const stockInfo = [];
-    const insufficientItems = [];
-
-    const stockCheckPromises = items.map(async (item) => {
-      const history = await prisma.stock_history.findMany({
-        where: {
-          stock_no: item.stock_no,
-          quantity_on_hand: { gt: 0 },
-        },
-        select: {
-          id: true,
-          quantity_on_hand: true,
-          quantity_issued: true,
-          created_at: true,
-          stock: {
-            select: {
-              description: true,
-              stock_no: true,
-            },
-          },
-        },
-        orderBy: { created_at: "asc" },
-      });
-
-      let availableQuantity = history.reduce(
-        (sum, stock) => sum + stock.quantity_on_hand,
-        0
-      );
-      let sufficientStock = availableQuantity >= item.approved_quantity;
-
-      stockInfo.push({
-        stock_no: item.stock_no,
-        availableQuantity,
-        requestedQuantity: item.approved_quantity,
-        sufficient: sufficientStock,
-      });
-
-      if (!sufficientStock) {
-        insufficientItems.push(item.stock_no);
-      }
-    });
-
-    await Promise.all(stockCheckPromises);
-
-    if (insufficientItems.length > 0) {
-      const availableStockDetails = stockInfo
-        .map(
-          (stock) =>
-            `${stock.stock_no}:${stock.availableQuantity}:${stock.requestedQuantity}`
-        )
-        .join(",");
+    const isItemSufficient = await checkItemSufficiency(data);
+    if (isItemSufficient.status === 407 || isItemSufficient.status === 500) {
       return {
-        status: 407,
-        message: availableStockDetails,
+        status: isItemSufficient.status,
+        message: isItemSufficient.message,
       };
     }
 
-    // All items have sufficient stock, proceed to approve the transaction
+    const currentYear = new Date().getFullYear();
+
+    // get the latest count of RIS
     const counter = await prisma.requisition_issue_slip_counter.upsert({
       where: { year: currentYear },
       update: { current_ris: { increment: 1 } },
@@ -95,8 +31,7 @@ module.exports = async (data) => {
         id: true,
       },
     });
-    // generete ramdom ris id + current date
-    const risId = `${ris}-${new Date().toISOString().split("T")[0]}`;
+
     await prisma.transaction.update({
       where: {
         id: data.transaction_id,
@@ -107,8 +42,7 @@ module.exports = async (data) => {
       },
     });
 
-    // Update stock and transaction item records
-    const promises = items.map(async (item) => {
+    const promises = isItemSufficient.items.map(async (item) => {
       const history = await prisma.stock_history.findMany({
         where: {
           stock_no: item.stock_no,
@@ -194,9 +128,94 @@ module.exports = async (data) => {
       },
     });
 
-    return { status: 200, message: "Transaction Approved", stockInfo };
+    return { status: 200, message: "Transaction Approved" };
   } catch (error) {
     console.log(error);
     return { status: 500, message: "Something went wrong." };
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+const checkItemSufficiency = async (data) => {
+  try {
+    const items = [];
+    let i = 0;
+    while (data[`item_id_${i}`]) {
+      items.push({
+        stock_no: data[`stock_no_${i}`],
+        transaction_id: data["transaction_id"],
+        item_id: data[`item_id_${i}`],
+        quantity: parseInt(data[`quantity_${i}`], 10),
+        approved_quantity: parseInt(data[`approved_quantity_${i}`], 10),
+      });
+      i++;
+    }
+    // Check stock levels before approving
+    const stockInfo = [];
+    const insufficientItems = [];
+
+    const stockCheckPromises = items.map(async (item) => {
+      const history = await prisma.stock_history.findMany({
+        where: {
+          stock_no: item.stock_no,
+          quantity_on_hand: { gt: 0 },
+        },
+        select: {
+          id: true,
+          quantity_on_hand: true,
+          quantity_issued: true,
+          created_at: true,
+          stock: {
+            select: {
+              description: true,
+              stock_no: true,
+            },
+          },
+        },
+        orderBy: { created_at: "asc" },
+      });
+
+      let availableQuantity = history.reduce(
+        (sum, stock) => sum + stock.quantity_on_hand,
+        0
+      );
+
+      let sufficientStock = availableQuantity >= item.approved_quantity;
+      stockInfo.push({
+        stock_no: item.stock_no,
+        availableQuantity,
+        requestedQuantity: item.approved_quantity,
+        sufficient: sufficientStock,
+      });
+
+      if (!sufficientStock) {
+        insufficientItems.push(item.stock_no);
+      }
+    });
+
+    await Promise.all(stockCheckPromises);
+
+    if (insufficientItems.length > 0) {
+      const availableStockDetails = stockInfo
+        .map(
+          (stock) =>
+            `${stock.stock_no}:${stock.availableQuantity}:${stock.requestedQuantity}`
+        )
+        .join(",");
+      return {
+        status: 407,
+        message: availableStockDetails,
+      };
+    }
+    return {
+      status: 200,
+      message: "Item is Enough.",
+      items,
+    };
+  } catch (error) {
+    return { status: 500, message: "Something went wrong." };
+  } finally {
+    await prisma.$disconnect();
   }
 };

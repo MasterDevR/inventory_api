@@ -49,6 +49,8 @@ const createItem = async (item, image) => {
   } catch (error) {
     console.error(error);
     return { status: 500, message: "Internal Server Error." };
+  } finally {
+    await prisma.$disconnect();
   }
 };
 

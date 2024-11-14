@@ -60,10 +60,8 @@ const putEditTransaction = async (latestRequest, id) => {
 
     await Promise.all(deletePromises); // Wait for all deletions to complete
 
-    const updatedTransaction = await Promise.all(updatePromises);
+    await Promise.all(updatePromises);
 
-    console.log("original ", originalTransaction);
-    console.log("updated Data ", updatedTransaction);
     return {
       status: 200,
       message: "Request Update Successful",
@@ -132,6 +130,8 @@ const deleteTransaction = async (id) => {
       status: 500,
       message: "Failed to delete transaction and associated items",
     };
+  } finally {
+    await prisma.$disconnect();
   }
 };
 module.exports = { getEditTransaction, putEditTransaction, deleteTransaction };

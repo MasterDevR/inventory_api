@@ -34,7 +34,6 @@ const createNewUser = async (req, res) => {
     const files = req.file;
     const userData = req.body;
     let imageSrc = "";
-
     if (files) {
       imageSrc = await uploadImage(files, "user");
     }

@@ -36,6 +36,8 @@ const updateItem = async (itemData) => {
     }
   } catch (err) {
     return { status: 500, message: `${err.message}` };
+  } finally {
+    await prisma.$disconnect();
   }
 };
 

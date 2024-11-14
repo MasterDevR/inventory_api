@@ -60,6 +60,7 @@ module.exports = async (status, search_data) => {
               select: {
                 item: true,
                 price: true,
+                distributor: true,
               },
             },
           },
@@ -70,5 +71,7 @@ module.exports = async (status, search_data) => {
     return result;
   } catch (error) {
     return { status: 500, message: "Something went wrong." };
+  } finally {
+    await prisma.$disconnect();
   }
 };

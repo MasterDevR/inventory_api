@@ -2,8 +2,8 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 module.exports = async () => {
-  console.log("first");
   try {
+    console.log("set viewed notification");
     await prisma.admin_notification.updateMany({
       where: { viewed: false },
       data: { viewed: true },
@@ -12,5 +12,7 @@ module.exports = async () => {
     return;
   } catch (error) {
     console.log(error);
+  } finally {
+    await prisma.$disconnect();
   }
 };
