@@ -123,7 +123,7 @@ model requisition_issue_slip_counter {
 
 model transaction {
   id                  String               @id @default(uuid())
-  ris                 Int?
+  ris                 String?
   department_id       String
   status              String
   transaction_purpose String

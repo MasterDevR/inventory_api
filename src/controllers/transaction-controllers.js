@@ -92,7 +92,6 @@ const approveTransaction = async (req, res) => {
   try {
     const obj = Object.assign({}, req.body);
     const result = await Transaction(obj);
-
     res.send(result);
   } catch (error) {
     res.send({ status: 500, message: "Something went wrong." });
@@ -143,6 +142,7 @@ const getNotification = async (req, res) => {
   try {
     const { department_id } = req.params;
     const result = await notification(department_id);
+    console.log(result);
     res.send(result);
   } catch (error) {
     res.send({ status: 500, message: "Something Went Wrong" });

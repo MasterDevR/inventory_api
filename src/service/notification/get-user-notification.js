@@ -2,10 +2,11 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 module.exports = async (departmentId) => {
+  console.log(departmentId);
   try {
     const result = await prisma.department_notification.findMany({
       orderBy: {
-        updated_at: "desc",
+        updated_at: "asc",
       },
       where: {
         department_id: departmentId,

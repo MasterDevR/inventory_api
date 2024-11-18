@@ -17,6 +17,7 @@ const stockAllocation = require("../stock/get-stock-allocation");
 const topStock = require("../stock/get-top-stock");
 const stockSummary = require("../stock//get-stock-summary");
 const StockCount = require("../../service/stock/stock-count");
+const stockCard = require("../stock/get-stock-card");
 const createNewStock = async (req, res) => {
   try {
     const item = req.body;
@@ -185,6 +186,7 @@ const getStats = async (req, res) => {
 };
 const getItemReport = async (req, res) => {
   try {
+    console.log("fasdfas");
     const { stock, year } = req.params;
     const result = await GetStockReport(stock, year);
     res.send(result);
@@ -253,6 +255,13 @@ const getStockSummary = async (req, res) => {
     res.send({ status: 500, message: "Internal Server Error" });
   }
 };
+
+const getStockCard = async (req, res) => {
+  const { stock_no } = req.params;
+  const result = await stockCard(stock_no);
+  res.send(result);
+};
+
 module.exports = {
   createNewStock,
   getStockList,
@@ -269,4 +278,5 @@ module.exports = {
   getStockAllocation,
   getTopStock,
   getStockSummary,
+  getStockCard,
 };
