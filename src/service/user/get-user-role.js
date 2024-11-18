@@ -16,6 +16,8 @@ const findRole = async () => {
     return { status: 200, result: result };
   } catch (error) {
     return { status: 500, message: "Internal Server Error." };
+  } finally {
+    await prisma.$disconnect();
   }
 };
 

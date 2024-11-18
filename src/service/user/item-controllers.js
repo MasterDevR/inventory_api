@@ -115,7 +115,6 @@ const stockType = async (req, res) => {
 
 const removeStock = async (req, res) => {
   const { stock_no } = req.params;
-  console.log("sadfasf");
   try {
     const findStockByStock_no = await findStock(stock_no);
 

@@ -41,6 +41,7 @@ module.exports = async () => {
                 item: true,
                 price: true,
                 measurement: true,
+                distributor: true,
               },
             },
           },
@@ -52,5 +53,7 @@ module.exports = async () => {
     console.log(error.message);
 
     return { status: 500, message: "Something Went Wrong." };
+  } finally {
+    await prisma.$disconnect();
   }
 };

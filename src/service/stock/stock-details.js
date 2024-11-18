@@ -20,5 +20,7 @@ module.exports = async (stock_no) => {
   } catch (error) {
     console.log(error.message);
     return { status: 500, message: "Something Went Wrong." };
+  } finally {
+    await prisma.$disconnect();
   }
 };

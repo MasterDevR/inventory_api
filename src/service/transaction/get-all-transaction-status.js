@@ -2,10 +2,16 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 module.exports = async () => {
-  let result = await prisma.transaction_status.findMany();
+  try {
+    let result = await prisma.transaction_status.findMany();
 
-  result = result.map((item) => {
-    return { ...item, name: "All" };
-  });
-  return result;
+    result = result.map((item) => {
+      return { ...item, name: "All" };
+    });
+    return result;
+  } catch (err) {
+    return [];
+  } finally {
+    await prisma.$disconnect();
+  }
 };

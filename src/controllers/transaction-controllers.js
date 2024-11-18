@@ -49,10 +49,9 @@ const getAllTransaction = async (req, res) => {
 };
 
 const createTransaction = async (req, res) => {
+  const data = req.body;
   try {
-    const data = req.body;
     const { departmentId } = req.params;
-
     const purpose = data.purpose || data[5];
     const combinedData =
       data.quantity.length > 1
@@ -64,8 +63,8 @@ const createTransaction = async (req, res) => {
             quantity: data.quantity[index],
           }))
         : data;
-
     const result = await CreateTransaction(combinedData, purpose, departmentId);
+    console.log(result);
     if (result.status === 200) {
       await createAdminNotification(
         data.quantity.length,
@@ -74,10 +73,9 @@ const createTransaction = async (req, res) => {
         result.id
       );
     }
-
     res.send(result);
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
     return { status: 500, message: "Someting Went Wrong." };
   }
 };
@@ -113,7 +111,6 @@ const readyTransaction = async (req, res) => {
   try {
     const data = Object.assign({}, req.body);
     const result = await transactionReady(data);
-
     res.send(result);
   } catch (error) {
     res.send({ status: 500, message: "Something went wrong." });

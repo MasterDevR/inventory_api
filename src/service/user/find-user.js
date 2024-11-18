@@ -18,6 +18,8 @@ const findUser = async (userData) => {
   } catch (error) {
     console.log("Error creating users:", error);
     return { status: 500, message: "Internal Server Error." };
+  } finally {
+    await prisma.$disconnect();
   }
 };
 

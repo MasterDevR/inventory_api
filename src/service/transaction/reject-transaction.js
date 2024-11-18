@@ -39,5 +39,7 @@ module.exports = async (data) => {
     return { status: 200, message: "Transaction Rejected" };
   } catch (error) {
     return { status: 500, message: "Something went wrong." };
+  } finally {
+    await prisma.$disconnect();
   }
 };

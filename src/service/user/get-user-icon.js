@@ -13,5 +13,7 @@ module.exports = async (department_id) => {
     });
   } catch (error) {
     return { status: 500, message: "Something went wrong." };
+  } finally {
+    await prisma.$disconnect();
   }
 };
