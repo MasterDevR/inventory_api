@@ -7,6 +7,7 @@ const itemsRoutes = require("../service/user/item-controllers");
 const usersRoutes = require("../controllers/users-controllers");
 const transactionRoutes = require("../controllers/transaction-controllers");
 const notification = require("../controllers/notification-controllers");
+
 router.post(
   "/create-stock",
   upload.single("image"),
@@ -23,6 +24,7 @@ router.put(
   upload.single("image"),
   itemsRoutes.putEditedStock
 );
+router.get("/stock-card/:stock_no", itemsRoutes.getStockCard);
 router.get("/get-stats", itemsRoutes.getStats);
 router.get("/get-top-stock", itemsRoutes.getTopStock);
 router.get("/get-stock-report/:stock/:year", itemsRoutes.getItemReport);
@@ -60,7 +62,6 @@ router.get(
   "/get-all-transaction-status",
   transactionRoutes.getAllTransactionStatus
 );
-
 router.get("/admin-notification", notification.getAdminNotification);
 router.put("/update-notification", notification.updateNotification);
 module.exports = router;

@@ -1,7 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const createItem = async (item, image) => {
-  console.log("asdadsf");
   try {
     if (item === undefined || image === null) {
       return { status: 404, message: "Data not found." };
@@ -44,7 +43,6 @@ const createItem = async (item, image) => {
         },
       ],
     });
-
     return { status: 201, message: "Item Created." };
   } catch (error) {
     console.error(error);

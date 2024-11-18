@@ -32,13 +32,16 @@ module.exports = async (data) => {
       },
     });
 
+    const currentDate = new Date();
+    const currentMonth = currentDate.toISOString().slice(0, 7);
+    const risNumber = `${currentYear}-${currentMonth}-${ris}`;
     await prisma.transaction.update({
       where: {
         id: data.transaction_id,
       },
       data: {
         status: status.id,
-        ris: ris,
+        ris: risNumber,
       },
     });
 
