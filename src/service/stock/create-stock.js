@@ -21,9 +21,10 @@ const createItem = async (item, image) => {
         description: item.description,
         measurement: item.measurement,
         stock_no: item.stock,
-        re_order_point: item.order,
+        // if item.order is not null, then it is not 0
+        re_order_point: item.order ? +item.order : "",
         quantity_on_hand: +item.quantity,
-        reference: item.reference,
+        reference: item.reference ? item.reference : "",
         distributor: item.distributor,
         consume_date: +item.consume,
         stock_type: type.id,
@@ -43,7 +44,7 @@ const createItem = async (item, image) => {
         },
       ],
     });
-    return { status: 201, message: "Item Created." };
+    return { status: 200, message: "Item Created." };
   } catch (error) {
     console.error(error);
     return { status: 500, message: "Internal Server Error." };

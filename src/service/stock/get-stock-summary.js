@@ -157,7 +157,13 @@ module.exports = async (year, month = 12) => {
       });
 
     const purchaseNo = purchaseNoWithDates.map((item) => item.purchase_order);
-    return { status: 200, purchaseNo, groupedData };
+
+    const uniqueYear = [
+      ...new Set(stockHistory.map((item) => item.created_at.getFullYear())),
+    ];
+    console.log(uniqueYear);
+
+    return { status: 200, purchaseNo, groupedData, uniqueYear };
   } catch (error) {
     const users = await prisma.user.findMany();
 

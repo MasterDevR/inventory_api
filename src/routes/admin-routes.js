@@ -24,7 +24,7 @@ router.put(
   upload.single("image"),
   itemsRoutes.putEditedStock
 );
-router.get("/stock-card/:stock_no", itemsRoutes.getStockCard);
+router.get("/stock-card/:stock_no/:year/:month", itemsRoutes.getStockCard);
 router.get("/get-stats", itemsRoutes.getStats);
 router.get("/get-top-stock", itemsRoutes.getTopStock);
 router.get("/get-stock-report/:stock/:year", itemsRoutes.getItemReport);
@@ -62,6 +62,12 @@ router.get(
   "/get-all-transaction-status",
   transactionRoutes.getAllTransactionStatus
 );
+router.put(
+  "/completed-transaction",
+  upload.none(),
+  transactionRoutes.completedTransaction
+);
+router.get("/get-monthly-expenses/:year", transactionRoutes.monthlyExpenses);
 router.get("/admin-notification", notification.getAdminNotification);
 router.put("/update-notification", notification.updateNotification);
 module.exports = router;

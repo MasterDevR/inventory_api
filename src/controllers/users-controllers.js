@@ -128,12 +128,7 @@ const verifyOTPController = async (req, res) => {
 const changeEmailController = async (req, res) => {
   const { department_id } = req.params;
   const { current_password, confirm_current_password, new_email } = req.body;
-  console.log(
-    department_id,
-    current_password,
-    confirm_current_password,
-    new_email
-  );
+
   if (current_password !== confirm_current_password) {
     return res.send({ status: 403, message: "Password does not match" });
   }

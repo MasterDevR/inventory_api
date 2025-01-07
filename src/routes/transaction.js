@@ -23,7 +23,6 @@ const createTransaction = async (req, res) => {
       },
     });
     for (const item of data) {
-      console.log(item.quantity);
       await prisma.transaction.create({
         data: {
           stock_no: item.stock,
@@ -62,7 +61,6 @@ const createTransaction = async (req, res) => {
           },
         },
       });
-      console.log(result, history.id, item.stock);
     }
     res.send({ status: 200, message: "Item Requested Successfuly." });
   } catch (error) {

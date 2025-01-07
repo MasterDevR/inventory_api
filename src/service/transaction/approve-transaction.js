@@ -34,18 +34,14 @@ module.exports = async (data) => {
 
     const currentDate = new Date();
     const currentMonth = currentDate.toISOString().slice(0, 7);
-    const risNumber = `${currentYear}-${currentMonth}-${ris}`;
-    await prisma.transaction.update({
-      where: {
-        id: data.transaction_id,
-      },
-      data: {
-        status: status.id,
-        ris: risNumber,
-      },
-    });
+    const risNumber = `${currentMonth}-${ris.toString().padStart(2, "0")}`;
 
-    const promises = isItemSufficient.items.map(async (item) => {
+    let totalPrice = 0;
+
+    const promises = isItemSufficient.items.map(async (item, index) => {
+      const price = parseFloat(data[`price_${index}`]);
+      totalPrice += price * item.approved_quantity;
+
       const history = await prisma.stock_history.findMany({
         where: {
           stock_no: item.stock_no,
@@ -111,6 +107,18 @@ module.exports = async (data) => {
     });
 
     await Promise.all(promises);
+
+    await prisma.transaction.update({
+      where: {
+        id: data.transaction_id,
+      },
+      data: {
+        status: status.id,
+        total_price_per_transaction: +totalPrice,
+
+        ris: risNumber,
+      },
+    });
 
     const email = await prisma.user.findFirst({
       where: {

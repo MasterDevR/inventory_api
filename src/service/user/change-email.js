@@ -28,7 +28,6 @@ module.exports = async (department_id, current_password, new_email) => {
     if (existingUser) {
       return { status: 400, message: "Email already in use." };
     }
-    console.log(existingUser);
 
     await prisma.user.update({
       where: {

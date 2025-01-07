@@ -10,9 +10,9 @@ const getAdminNotification = async (req, res) => {
       checkLowStockAndNotifyAdmin(+get),
     ]);
     res.status(200).json({
-      result,
+      result: result.result,
       lowStockResult,
-      hasMore: result.length >= get && lowStockResult.length >= get,
+      hasMore: result.count >= get || lowStockResult.length >= get,
     });
   } catch (error) {
     console.error("Error in getAdminNotification:", error);

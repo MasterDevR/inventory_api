@@ -76,9 +76,9 @@ model stock {
   description      String
   measurement      String
   stock_no         String             @unique
-  re_order_point   String             @unique
-  image            String
-  reference        String
+  re_order_point   String?
+  image            String?
+  reference        String?
   consume_date     Int
   distributor      String
   stock_counter    Int                @default(0)
@@ -122,18 +122,19 @@ model requisition_issue_slip_counter {
 }
 
 model transaction {
-  id                  String               @id @default(uuid())
-  ris                 String?
-  department_id       String
-  status              String
-  transaction_purpose String
-  created_at          DateTime             @default(now())
-  updated_at          DateTime             @updatedAt
-  admin_notification  admin_notification[]
-  user                user                 @relation(fields: [department_id], references: [department_id], onDelete: Cascade)
-  Status              transaction_status   @relation(fields: [status], references: [id])
-  TransactionType     transaction_purpose  @relation(fields: [transaction_purpose], references: [id])
-  transaction_item    transaction_item[]
+  id                          String               @id @default(uuid())
+  ris                         String?
+  department_id               String
+  status                      String
+  transaction_purpose         String
+  total_price_per_transaction Float                @default(0)
+  created_at                  DateTime             @default(now())
+  updated_at                  DateTime             @updatedAt
+  admin_notification          admin_notification[]
+  user                        user                 @relation(fields: [department_id], references: [department_id], onDelete: Cascade)
+  Status                      transaction_status   @relation(fields: [status], references: [id])
+  TransactionType             transaction_purpose  @relation(fields: [transaction_purpose], references: [id])
+  transaction_item            transaction_item[]
 
   @@index([department_id], map: "transaction_department_id_fkey")
   @@index([status], map: "transaction_status_fkey")
@@ -142,6 +143,7 @@ model transaction {
 
 model transaction_item {
   id                String         @id @default(uuid())
+  price             Float          @default(0)
   transaction_id    String
   stock_no          String
   quantity          Int
@@ -181,6 +183,7 @@ model department_notification {
   created_at     DateTime           @default(now())
   updated_at     DateTime           @updatedAt
   Status         transaction_status @relation(fields: [status], references: [id])
+  viewed         Boolean            @default(false)
 
   @@index([status], map: "department_notification_status_fkey")
   @@index([transaction_id], map: "department_notification_transaction_id_fkey")

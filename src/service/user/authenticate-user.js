@@ -42,6 +42,7 @@ const authenticatePassword = async ({ username, password }) => {
         department: true,
         image: true,
         role: true,
+        department_code: true,
         Requestor_type: {
           select: {
             name: true,

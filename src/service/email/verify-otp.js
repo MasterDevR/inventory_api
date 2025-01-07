@@ -1,7 +1,6 @@
 const { getOTPDetails } = require("./get-otp-details");
 const encryptPassword = require("../../utils/encryp-password");
 const { PrismaClient } = require("@prisma/client");
-
 const prisma = new PrismaClient();
 
 module.exports = async (verifyEmail, otp) => {

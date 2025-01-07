@@ -20,9 +20,28 @@ module.exports = async (data, purpose, departmentId) => {
         id: true,
       },
     });
+    const departmentCode = await prisma.user.findFirst({
+      where: {
+        department_id: departmentId,
+      },
+      select: {
+        department_code: true,
+      },
+    });
+    const transactionDate = new Date();
+
+    // Extract components of the transaction date
+    const year = transactionDate.getFullYear();
+    const month = String(transactionDate.getMonth() + 1).padStart(2, "0"); // Add 1 and pad with leading zero
+    const date = String(transactionDate.getDate()).padStart(2, "0"); // Pad with leading zero
+    const seconds = String(transactionDate.getSeconds()).padStart(2, "0");
+
+    // Combine to create a unique transaction ID
+    const formattedTransactionId = `${departmentCode.department_code}${year}${month}${date}${seconds}`;
 
     const transaction = await prisma.transaction.create({
       data: {
+        id: formattedTransactionId,
         department_id: departmentId,
         status: reqStatus.id,
         transaction_purpose: Purpose.id,
@@ -35,6 +54,7 @@ module.exports = async (data, purpose, departmentId) => {
         data: {
           transaction_id: transaction.id,
           stock_no: item.stock,
+          price: +item.price,
           quantity: +item.quantity,
           created_at: dateNow,
         },

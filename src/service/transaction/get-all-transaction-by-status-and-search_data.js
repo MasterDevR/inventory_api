@@ -10,6 +10,9 @@ module.exports = async (status, search_data) => {
           OR: [
             { department_id: { contains: search_data } },
             {
+              id: { contains: search_data },
+            },
+            {
               user: {
                 OR: [
                   { department: { contains: search_data } },
@@ -56,10 +59,10 @@ module.exports = async (status, search_data) => {
             stock_no: true,
             quantity: true,
             approved_quantity: true,
+            price: true,
             stock: {
               select: {
                 item: true,
-                price: true,
                 distributor: true,
               },
             },

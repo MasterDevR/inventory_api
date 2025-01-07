@@ -48,11 +48,10 @@ module.exports = async (searchData) => {
             stock_no: true,
             quantity: true,
             approved_quantity: true,
-
+            price: true,
             stock: {
               select: {
                 item: true,
-                price: true,
                 distributor: true,
               },
             },

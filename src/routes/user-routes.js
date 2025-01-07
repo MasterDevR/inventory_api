@@ -26,8 +26,8 @@ router.put(
   upload.none(),
   userRoutes.changePassword
 );
-router.post("/verify-email/", userRoutes.verifyEmailController);
-router.post("/verify-otp", userRoutes.verifyOTPController);
+// router.post("/verify-email/", userRoutes.verifyEmailController);
+// router.post("/verify-otp", userRoutes.verifyOTPController);
 router.put(
   "/change-email/:department_id",
   upload.none(),
@@ -36,4 +36,10 @@ router.put(
 router.get("/edit-transaction/:id", transaction.GetEditTransaction);
 router.put("/modify-transactions/:id", transaction.PutEditTransaction);
 router.delete("/delete-transactions/:id", transaction.DeleteTransaction);
+router.put("/update-notification", transaction.updateNotification);
+router.post(
+  "/generate-request-otp/:department_id",
+  transaction.generateOtpController
+);
+router.post("/verify-otp/:department_id", transaction.verifyOtpController);
 module.exports = router;

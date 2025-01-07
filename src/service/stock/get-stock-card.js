@@ -1,8 +1,58 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-
-module.exports = async (stock_no) => {
+const monthList = [
+  {
+    name: "January",
+    value: 0,
+  },
+  {
+    name: "February",
+    value: 1,
+  },
+  {
+    name: "March",
+    value: 2,
+  },
+  {
+    name: "April",
+    value: 3,
+  },
+  {
+    name: "May",
+    value: 4,
+  },
+  {
+    name: "June",
+    value: 5,
+  },
+  {
+    name: "July",
+    value: 6,
+  },
+  {
+    name: "August",
+    value: 7,
+  },
+  {
+    name: "September",
+    value: 8,
+  },
+  {
+    name: "October",
+    value: 9,
+  },
+  {
+    name: "November",
+    value: 10,
+  },
+  {
+    name: "December",
+    value: 11,
+  },
+];
+module.exports = async (stock_no, year, month) => {
   //wrap to try catch
+
   try {
     // get all stock card by stock_no and same year based on created_at and transaction_item is not empty
     const stocks = await prisma.stock_history.findMany({
@@ -37,13 +87,26 @@ module.exports = async (stock_no) => {
       return { status: 404, message: "Stock not found." };
     }
 
+    const availableYear = await prisma.stock_history.findMany({
+      orderBy: {
+        created_at: "desc",
+      },
+      select: {
+        created_at: true,
+      },
+    });
+    // year might be an array, store each year in an array dont include the year twice
+    const uniqueYear = [
+      ...new Set(availableYear.map((item) => item.created_at.getFullYear())),
+    ];
+
     const initailQty = await prisma.stock_history.findMany({
       // get the oldest stock_history by created_at
       where: {
         stock_no,
         created_at: {
-          gte: new Date(new Date().getFullYear(), 0, 1),
-          lte: new Date(new Date().getFullYear(), 11, 31),
+          gte: new Date(year, month, 1),
+          lte: new Date(year, month, 31),
         },
       },
       select: {
@@ -55,10 +118,21 @@ module.exports = async (stock_no) => {
         created_at: "asc",
       },
     });
+    // get the month name from the month value
+
+    const monthNameArray = monthList.filter((item) => item.value === +month);
+    if (initailQty.length === 0) {
+      return {
+        status: 404,
+        data: stocks,
+        availableYear: uniqueYear,
+        message: `No Stock Card Available on the month of ${monthNameArray[0].name} year ${year}`,
+      };
+    }
     const firstData = initailQty[0];
     // sum of each initial quantity
     const initialQty = initailQty.reduce(
-      (acc, curr) => acc + curr.quantity_on_hand,
+      (acc, curr) => acc + curr.quantity_on_hand + curr.quantity_issued,
       0
     );
     let deductedQty = initialQty;
@@ -94,7 +168,8 @@ module.exports = async (stock_no) => {
       data: stocks,
       initialQty,
       initialDate: firstData.created_at,
-    }; // Return the modified stocks with transaction data
+      availableYear: uniqueYear,
+    };
   } catch (error) {
     console.error("Error in getStockCard:", error);
     return { status: 500, message: "Something went wrong." };

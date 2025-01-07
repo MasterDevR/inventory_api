@@ -3,15 +3,12 @@ const prisma = new PrismaClient();
 
 module.exports = async () => {
   try {
-    await prisma.admin_notification.updateMany({
+    await prisma.department_notification.updateMany({
       where: { viewed: false },
       data: { viewed: true },
     });
-
-    return;
+    return { status: 200, message: "Notification updated successfully." };
   } catch (error) {
-    console.log(error);
-  } finally {
-    await prisma.$disconnect();
+    return { status: 500, message: "Something went wrong." };
   }
 };

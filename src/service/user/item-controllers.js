@@ -23,7 +23,7 @@ const createNewStock = async (req, res) => {
     const item = req.body;
     const file = req.file;
 
-    if (!file || item === undefined) {
+    if (item === undefined) {
       return res.send({ status: 403, message: "Item Data Must Be inputted" });
     }
 
@@ -32,6 +32,11 @@ const createNewStock = async (req, res) => {
       res.send({ status: 403, message: "Item is existing." });
 
       return isExisting;
+    }
+    if (!file) {
+      const result = await createItem(item, "");
+      res.send(result);
+      return;
     }
     const imageURL = await uploadImage(req.file, "file");
     const result = await createItem(item, imageURL);
@@ -77,7 +82,7 @@ const getAvailableStock = async (req, res) => {
   try {
     const count = await StockCount();
     const { search_item } = req.params;
-    const { page = 1, limit = 5 } = req.query;
+    const { page = 1, limit = 10 } = req.query;
 
     let item;
     if (search_item === "undefined") {
@@ -160,7 +165,7 @@ const putEditedStock = async (req, res) => {
     const { stock_no } = req.params;
     const data = req.body;
     const file = req.file;
-    if (!data || Object.keys(data).length !== 10) {
+    if (!data || Object.keys(data).length !== 8) {
       return res.send({
         status: 404,
         message: "Item canno be updated with an empty value.",
@@ -178,6 +183,7 @@ const putEditedStock = async (req, res) => {
     res.send(result);
   } catch (error) {
     console.log(error);
+    res.send({ status: 500, message: "Something Went Wrong." });
   }
 };
 const getStats = async (req, res) => {
@@ -186,7 +192,6 @@ const getStats = async (req, res) => {
 };
 const getItemReport = async (req, res) => {
   try {
-    console.log("fasdfas");
     const { stock, year } = req.params;
     const result = await GetStockReport(stock, year);
     res.send(result);
@@ -257,8 +262,8 @@ const getStockSummary = async (req, res) => {
 };
 
 const getStockCard = async (req, res) => {
-  const { stock_no } = req.params;
-  const result = await stockCard(stock_no);
+  const { stock_no, year, month } = req.params;
+  const result = await stockCard(stock_no, year, month);
   res.send(result);
 };
 

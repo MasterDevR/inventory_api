@@ -21,7 +21,8 @@ module.exports = async (get) => {
         },
       },
     });
-    return result;
+    const count = await prisma.admin_notification.count();
+    return { result, count };
   } catch (error) {
     console.error("Error fetching admin notifications:", error.message);
     return [];

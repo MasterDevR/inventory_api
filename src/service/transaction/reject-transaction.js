@@ -1,6 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const generateEmail = require("../notification/generate-email-notification");
+const generateUserNotification = require("../notification/create-user-notification");
 
 module.exports = async (data) => {
   try {
@@ -28,6 +29,7 @@ module.exports = async (data) => {
       select: {
         user: {
           select: {
+            department_id: true,
             email: true,
           },
         },
@@ -35,6 +37,7 @@ module.exports = async (data) => {
     });
 
     await generateEmail(response[0].user.email, "rejected");
+    await generateUserNotification(data, response[0].user.department_id);
 
     return { status: 200, message: "Transaction Rejected" };
   } catch (error) {

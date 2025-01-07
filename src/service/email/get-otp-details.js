@@ -19,7 +19,6 @@ const otpStore = {
 };
 
 const setOTPDetails = (otp, email) => {
-  console.log(otp, email);
   otpStore.setOTP(otp, email);
 };
 

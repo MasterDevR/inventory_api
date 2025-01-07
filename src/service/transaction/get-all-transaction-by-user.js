@@ -6,6 +6,9 @@ module.exports = async (department_id, id) => {
     let result;
     if (id !== "undefined") {
       result = await prisma.transaction.findFirst({
+        orderBy: {
+          created_at: "desc",
+        },
         where: {
           id: id,
         },
@@ -31,6 +34,9 @@ module.exports = async (department_id, id) => {
       });
     } else {
       result = await prisma.transaction.findMany({
+        orderBy: {
+          created_at: "desc",
+        },
         where: {
           department_id: department_id,
         },

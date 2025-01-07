@@ -69,7 +69,6 @@ const updateEditedStock = async (stock_no, data, file) => {
 
       const fileRef = ref(storage, filePath);
 
-      // Try to delete the existing image, but continue even if it fails
       try {
         await deleteObject(fileRef);
       } catch (deleteError) {
@@ -87,8 +86,8 @@ const updateEditedStock = async (stock_no, data, file) => {
         quantity_on_hand: latestQuantity,
         description: data.description,
         measurement: data.measurement,
-        re_order_point: data.order,
-        reference: data.reference,
+        re_order_point: data.order ? data.order : null,
+        reference: data.reference ? data.reference : null,
         consume_date: +data.consume,
         distributor: data.distributor,
         image: itemImage, // Update the image
@@ -97,8 +96,8 @@ const updateEditedStock = async (stock_no, data, file) => {
 
     return { status: 200, message: "Item Updated." };
   } catch (error) {
-    console.log(error.message);
-    return { status: 500, message: error.message };
+    console.log(error);
+    return { status: 500, message: "Something Went Wrong." };
   } finally {
     await prisma.$disconnect();
   }

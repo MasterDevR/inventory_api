@@ -12,11 +12,17 @@ const getTransactionsByStatusAndSearch = require("../service/transaction/get-all
 const transactionReady = require("../service/transaction/ready-transaction");
 const getAllTransactionByUser = require("../service/transaction/get-all-transaction-by-user");
 const notification = require("../service/notification/get-user-notification");
+const VerifyOtp = require("../utils/verify-request-otp");
 const {
   getEditTransaction,
   putEditTransaction,
   deleteTransaction,
 } = require("../service/transaction/edit-transactiob");
+const setTransactionCompleted = require("../service/transaction/completed-transaction");
+const setViewedNotification = require("../service/notification/set-viewed-notification-user");
+const generateOtp = require("../service/email/generate-request-otp");
+const getMonthlyExpenses = require("../service/transaction/get-monthly-transaction.js");
+
 const getAllTransaction = async (req, res) => {
   let result;
   try {
@@ -50,6 +56,7 @@ const getAllTransaction = async (req, res) => {
 
 const createTransaction = async (req, res) => {
   const data = req.body;
+
   try {
     const { departmentId } = req.params;
     const purpose = data.purpose || data[5];
@@ -64,7 +71,6 @@ const createTransaction = async (req, res) => {
           }))
         : data;
     const result = await CreateTransaction(combinedData, purpose, departmentId);
-    console.log(result);
     if (result.status === 200) {
       await createAdminNotification(
         data.quantity.length,
@@ -73,6 +79,7 @@ const createTransaction = async (req, res) => {
         result.id
       );
     }
+
     res.send(result);
   } catch (error) {
     console.log(error);
@@ -142,7 +149,6 @@ const getNotification = async (req, res) => {
   try {
     const { department_id } = req.params;
     const result = await notification(department_id);
-    console.log(result);
     res.send(result);
   } catch (error) {
     res.send({ status: 500, message: "Something Went Wrong" });
@@ -161,8 +167,35 @@ const PutEditTransaction = async (req, res) => {
 };
 const DeleteTransaction = async (req, res) => {
   const { id } = req.params;
-  console.log(id);
   const result = await deleteTransaction(id);
+  res.send(result);
+};
+const updateNotification = async (req, res) => {
+  const result = await setViewedNotification();
+  res.send(result);
+};
+const completedTransaction = async (req, res) => {
+  const data = req.body;
+  const result = await setTransactionCompleted(data);
+  res.send(result);
+};
+
+// otp controller
+const generateOtpController = async (req, res) => {
+  const { department_id } = req.params;
+
+  const otp = await generateOtp(department_id);
+  res.send(otp);
+};
+const verifyOtpController = async (req, res) => {
+  const { department_id } = req.params;
+  const { otp } = req.body;
+  const result = await VerifyOtp(department_id, otp);
+  res.send(result);
+};
+const monthlyExpenses = async (req, res) => {
+  const { year = 2024 } = req.params;
+  const result = await getMonthlyExpenses(year);
   res.send(result);
 };
 module.exports = {
@@ -178,4 +211,9 @@ module.exports = {
   GetEditTransaction,
   PutEditTransaction,
   DeleteTransaction,
+  updateNotification,
+  completedTransaction,
+  generateOtpController,
+  verifyOtpController,
+  monthlyExpenses,
 };

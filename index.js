@@ -27,6 +27,9 @@ const verifyTokenRoutes = require("./src/routes/validate-token");
 const validateToken = require("./src/routes/validate-token");
 const tokenValidator = require("./src/middlewares/admin-middleware");
 
+const verifyEmailRoute = require("./src/routes/verify-email");
+const verifyOTPRoute = require("./src/routes/verify-otp");
+
 app.use("/admin", tokenValidator, adminRoutes);
 app.use("/user", tokenValidator, usersRoutes);
 app.use("/validate-token", validateToken);
@@ -35,6 +38,8 @@ app.use("/logout", logoutRoute);
 app.use("/setting", settingRoutes);
 app.use("/verify-token", verifyTokenRoutes);
 
+app.use("/verify-email", verifyEmailRoute);
+app.use("/verify-otp", verifyOTPRoute);
 // // server port
 const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
